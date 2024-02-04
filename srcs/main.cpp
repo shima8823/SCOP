@@ -1,138 +1,121 @@
-#include <GLFW/glfw3.h>
+#include "opengl.hpp"
 #include "type.hpp"
 #include <vector>
 
-// load .obj file that request vertex and fragment
-bool loadOBJ(
-	const char * path, 
-	std::vector<vec3> & out_vertices, 
-	std::vector<vec2> & out_uvs,
-	std::vector<vec3> & out_normals
-){
-	printf("Loading OBJ file %s...\n", path);
+#include <cmath>
 
-	std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
-	std::vector<vec3> temp_vertices; 
-	std::vector<vec2> temp_uvs;
-	std::vector<vec3> temp_normals;
+#include "glm.hpp"
+#include "load.hpp"
 
+#include <iostream>
 
-	FILE * file = fopen(path, "r");
-	if( file == NULL ){
-		printf("Impossible to open the file ! Are you in the right path ? See Tutorial 1 for details\n");
-		getchar();
-		return false;
-	}
+using namespace std;
 
-	while( 1 ){
-
-		char lineHeader[128];
-		// read the first word of the line
-		int res = fscanf(file, "%s", lineHeader);
-		if (res == EOF)
-			break; // EOF = End Of File. Quit the loop.
-
-		// else : parse lineHeader
-		
-		if ( strcmp( lineHeader, "v" ) == 0 ){
-			vec3 vertex;
-			fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z );
-			temp_vertices.push_back(vertex);
-		}else if ( strcmp( lineHeader, "vt" ) == 0 ){
-			vec2 uv;
-			fscanf(file, "%f %f\n", &uv.x, &uv.y );
-			uv.y = -uv.y; // Invert V coordinate since we will only use DDS texture, which are inverted. Remove if you want to use TGA or BMP loaders.
-			temp_uvs.push_back(uv);
-		}else if ( strcmp( lineHeader, "vn" ) == 0 ){
-			vec3 normal;
-			fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z );
-			temp_normals.push_back(normal);
-		}else if ( strcmp( lineHeader, "f" ) == 0 ){
-			std::string vertex1, vertex2, vertex3;
-			unsigned int vertexIndex[3], uvIndex[3], normalIndex[3];
-			int matches = fscanf(file, "%d/%d/%d %d/%d/%d %d/%d/%d\n", &vertexIndex[0], &uvIndex[0], &normalIndex[0], &vertexIndex[1], &uvIndex[1], &normalIndex[1], &vertexIndex[2], &uvIndex[2], &normalIndex[2] );
-			if (matches != 9){
-				printf("File can't be read by our simple parser :-( Try exporting with other options\n");
-				fclose(file);
-				return false;
-			}
-			vertexIndices.push_back(vertexIndex[0]);
-			vertexIndices.push_back(vertexIndex[1]);
-			vertexIndices.push_back(vertexIndex[2]);
-			uvIndices    .push_back(uvIndex[0]);
-			uvIndices    .push_back(uvIndex[1]);
-			uvIndices    .push_back(uvIndex[2]);
-			normalIndices.push_back(normalIndex[0]);
-			normalIndices.push_back(normalIndex[1]);
-			normalIndices.push_back(normalIndex[2]);
-		}else{
-			// Probably a comment, eat up the rest of the line
-			char stupidBuffer[1000];
-			fgets(stupidBuffer, 1000, file);
-		}
-
-	}
-
-	// For each vertex of each triangle
-	for( unsigned int i=0; i<vertexIndices.size(); i++ ){
-
-		// Get the indices of its attributes
-		unsigned int vertexIndex = vertexIndices[i];
-		unsigned int uvIndex = uvIndices[i];
-		unsigned int normalIndex = normalIndices[i];
-		
-		// Get the attributes thanks to the index
-		vec3 vertex = temp_vertices[ vertexIndex-1 ];
-		vec2 uv = temp_uvs[ uvIndex-1 ];
-		vec3 normal = temp_normals[ normalIndex-1 ];
-		
-		// Put the attributes in buffers
-		out_vertices.push_back(vertex);
-		out_uvs     .push_back(uv);
-		out_normals .push_back(normal);
-	
-	}
-	fclose(file);
-	return true;
-}
-
-int main(void) {
+int main(const int argc, const char *argv[]) {
   GLFWwindow *window;
 
   // GLFWライブラリの初期化
   if (!glfwInit())
     return -1;
 
+  glfwWindowHint(GLFW_SAMPLES, 4);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+#ifdef __APPLE__
+  std::cout << "I'm apple machine" << std::endl;
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+#endif
+
   // ウィンドウの作成
-  window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+  window = glfwCreateWindow(1024, 768, "Hello World", NULL, NULL);
   if (!window) {
     glfwTerminate();
     return -1;
   }
 
-  // 作成したウィンドウを現在のコンテキストに設定
+  //   oepngl shader version: 4.1
   glfwMakeContextCurrent(window);
+  glEnable(GL_DEPTH_TEST);
 
-  // ウィンドウが閉じられるまでループ
+  // Initialize GLEW
+  glewExperimental = true; // Needed for core profile
+  if (glewInit() != GLEW_OK) {
+    fprintf(stderr, "Failed to initialize GLEW\n");
+    getchar();
+    glfwTerminate();
+    return -1;
+  }
 
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
+  glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 
-  while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
-         glfwWindowShouldClose(window) == 0) {
+  GLuint VertexArrayID;
+  glGenVertexArrays(1, &VertexArrayID);
+  glBindVertexArray(VertexArrayID);
+
+  // Read our .obj file
+  std::vector<vec3> vertices;
+  bool res = loadOBJ(argv[1], vertices);
+
+  std::cout << (res ? "ok" : "no") << std::endl;
+
+  // shader program
+  GLuint programID = LoadShaders("shaders/VertexShader.vertexshader",
+                                 "shaders/FragmentShader.fragmentshader");
+
+  // Get a handle for our "MVP" uniform
+  GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+
+  // camera
+  Mat4 Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+  Mat4 View = lookAt(vec3(4, 3, 3), vec3(0, 0, 0), vec3(0, 1, 0));
+  Mat4 Model = Mat4(1.0f);
+  Mat4 MVP = Projection * View * Model;
+
+  // Load it into a VBO
+  GLuint vertexbuffer;
+  glGenBuffers(1, &vertexbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), &vertices[0],
+               GL_STATIC_DRAW);
+
+  do {
     // レンダリングここから
-
     // 背景色を設定
-    glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // glClear(GL_COLOR_BUFFER_BIT);
 
-    // レンダリングここまで
+    // Use our shader
+    glUseProgram(programID);
+    // Send our transformation to the currently bound shader,
+    // in the "MVP" uniform
+    glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-    // フロントバッファとバックバッファを交換
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glVertexAttribPointer(0, // attribute. No particular reason for 0, but must
+                             // match the layout in the shader.
+                          3, // size
+                          GL_FLOAT, // type
+                          GL_FALSE, // normalized?
+                          0,        // stride
+                          (void *)0 // array buffer offset
+    );
+
+    // Draw the triangle !
+    glDrawArrays(GL_TRIANGLES, 0, vertices.size());
+
+    glDisableVertexAttribArray(0);
+
     glfwSwapBuffers(window);
-
-    // イベントをポーリング
     glfwPollEvents();
-  }
+  } while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS &&
+           glfwWindowShouldClose(window) == 0);
+
+  glDeleteBuffers(1, &vertexbuffer);
+  glDeleteProgram(programID);
+  // glDeleteVertexArrays(1, &VertexArrayID);
 
   glfwTerminate();
   return 0;
