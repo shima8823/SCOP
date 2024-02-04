@@ -4,11 +4,13 @@ CXXFLAGS = -std=c++17 -MMD -MP -g
 # -Iinclude/containers -Iinclude/utils
 CPPFLAGS = 
 LDFLAGS = 
-LDLIBS = -lglfw -framework OpenGL
+LDLIBS = -lGLEW -lglfw -framework OpenGL
 NAME = scop
+INCDIR	=	includes
+INCS	=	$(addprefix -I,$(INCDIR))
 
 # ########### SRCS ########### #
-SRCS = main.cpp
+SRCS = main.cpp type.cpp load.cpp glm.cpp
 VPATH = srcs
 # ############################ #
 
@@ -28,7 +30,7 @@ $(NAME): $(OBJS)
 	$(CXX) -o $(NAME) $(OBJS) $(LDFLAGS) $(LDLIBS)
 
 $(OBJSDIR)/%.o: %.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ -c $<
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(INCS) -o $@ -c $<
 
 clean:
 	$(RM) $(OBJS) $(DEPENDS)
