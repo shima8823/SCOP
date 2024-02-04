@@ -1,0 +1,12 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+layout(location = 0) in vec3 vertexPosition_modelspace;
+
+// Uniform変数としてMVP行列を追加
+uniform mat4 MVP;
+
+void main(){
+    // 頂点座標をMVP行列で変換
+    gl_Position = MVP * vec4(vertexPosition_modelspace, 1.0);
+}
