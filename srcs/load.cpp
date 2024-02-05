@@ -33,19 +33,28 @@ bool loadOBJ(const char *path, std::vector<vec3> &out_vertices) {
       fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
       temp_vertices.push_back(vertex);
     } else if (strcmp(lineHeader, "f") == 0) {
-      std::string vertex1, vertex2, vertex3;
-      unsigned int vertexIndex[3];
-      int matches = fscanf(file, "%d %d %d\n", &vertexIndex[0], &vertexIndex[1],
-                           &vertexIndex[2]);
-      if (matches != 3) {
-        printf("File can't be read by our simple parser :-( Try exporting with "
-               "other options\n");
-        fclose(file);
-        return false;
+      std::vector<unsigned int> vertexN;
+      unsigned int vertexIndex;
+
+      char *line = NULL;
+      size_t len = 0;
+      getline(&line, &len, file);
+
+      char *token = strtok(line, " ");
+      while (token != NULL) {
+        if (strcmp(token, "f") != 0) {
+          sscanf(token, "%u", &vertexIndex);
+          vertexN.push_back(vertexIndex);
+        }
+        token = strtok(NULL, " ");
       }
-      vertexIndices.push_back(vertexIndex[0]);
-      vertexIndices.push_back(vertexIndex[1]);
-      vertexIndices.push_back(vertexIndex[2]);
+
+      for (size_t i = 1; i + 1 < vertexN.size(); i++) {
+        vertexIndices.push_back(vertexN[0]);
+        vertexIndices.push_back(vertexN[i]);
+        vertexIndices.push_back(vertexN[i + 1]);
+      }
+
     } else {
       // Probably a comment, eat up the rest of the line
       char stupidBuffer[1000];
