@@ -4,11 +4,11 @@
 
 #include "load.hpp"
 
-bool loadOBJ(const char *path, std::vector<vec3> &out_vertices) {
+bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices) {
   printf("Loading OBJ file %s...\n", path);
 
   std::vector<unsigned int> vertexIndices;
-  std::vector<vec3> temp_vertices;
+  std::vector<ft_glm::vec3> temp_vertices;
 
   FILE *file = fopen(path, "r");
   if (file == NULL) {
@@ -29,7 +29,7 @@ bool loadOBJ(const char *path, std::vector<vec3> &out_vertices) {
     // else : parse lineHeader
 
     if (strcmp(lineHeader, "v") == 0) {
-      vec3 vertex;
+      ft_glm::vec3 vertex;
       fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
       temp_vertices.push_back(vertex);
     } else if (strcmp(lineHeader, "f") == 0) {
@@ -69,7 +69,7 @@ bool loadOBJ(const char *path, std::vector<vec3> &out_vertices) {
     unsigned int vertexIndex = vertexIndices[i];
 
     // Get the attributes thanks to the index
-    vec3 vertex = temp_vertices[vertexIndex - 1];
+    ft_glm::vec3 vertex = temp_vertices[vertexIndex - 1];
 
     // Put the attributes in buffers
     out_vertices.push_back(vertex);

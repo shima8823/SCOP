@@ -1,18 +1,18 @@
 #include "opengl.hpp"
-#include "type.hpp"
 #include <vector>
 
 #include <cmath>
 
-#include "glm.hpp"
+#include "ft_glm.hpp"
 #include "load.hpp"
 
 #include <iostream>
 
+#include "controls.hpp"
+
 using namespace std;
 
 int main(const int argc, const char *argv[]) {
-  GLFWwindow *window;
 
   // GLFWライブラリの初期化
   if (!glfwInit())
@@ -55,7 +55,7 @@ int main(const int argc, const char *argv[]) {
   glBindVertexArray(VertexArrayID);
 
   // Read our .obj file
-  std::vector<vec3> vertices;
+  std::vector<ft_glm::vec3> vertices;
   bool res = loadOBJ(argv[1], vertices);
 
   std::cout << (res ? "ok" : "no") << std::endl;
@@ -67,18 +67,16 @@ int main(const int argc, const char *argv[]) {
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
-  // camera
-  Mat4 Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-  Mat4 View = lookAt(vec3(4, 3, 3), vec3(0, 0, 0), vec3(0, 1, 0));
-  Mat4 Model = Mat4(1.0f);
-  Mat4 MVP = Projection * View * Model;
+  // Hide the mouse and enable unlimited mouvement
+  glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+  glfwSetCursorPos(window, 1024 / 2, 768 / 2);
 
   // Load it into a VBO
   GLuint vertexbuffer;
   glGenBuffers(1, &vertexbuffer);
   glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(vec3), &vertices[0],
-               GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(ft_glm::vec3),
+               &vertices[0], GL_STATIC_DRAW);
 
   do {
     // レンダリングここから
@@ -88,6 +86,14 @@ int main(const int argc, const char *argv[]) {
 
     // Use our shader
     glUseProgram(programID);
+
+    // Compute the MVP matrix from keyboard and mouse input
+    computeMatricesFromInputs();
+    ft_glm::Mat4 ProjectionMatrix = getProjectionMatrix();
+    ft_glm::Mat4 ViewMatrix = getViewMatrix();
+    ft_glm::Mat4 ModelMatrix = ft_glm::Mat4(1.0);
+    ft_glm::Mat4 MVP = ProjectionMatrix * ViewMatrix * ModelMatrix;
+
     // Send our transformation to the currently bound shader,
     // in the "MVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
