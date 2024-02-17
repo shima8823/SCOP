@@ -4,13 +4,13 @@ CXXFLAGS = -std=c++17 -MMD -MP -g
 # -Iinclude/containers -Iinclude/utils
 CPPFLAGS = 
 LDFLAGS = 
-LDLIBS = -lGLEW -lglfw -framework OpenGL
+LDLIBS = -lglfw -lGLEW -framework OpenGL
 NAME = scop
 INCDIR	=	includes
 INCS	=	$(addprefix -I,$(INCDIR))
 
 # ########### SRCS ########### #
-SRCS = main.cpp type.cpp load.cpp glm.cpp
+SRCS = main.cpp load.cpp ft_glm.cpp controls.cpp
 VPATH = srcs
 # ############################ #
 
