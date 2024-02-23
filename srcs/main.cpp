@@ -79,6 +79,23 @@ int main(const int argc, const char *argv[]) {
   GLuint programID = LoadShaders("shaders/VertexShader.vertexshader",
                                  "shaders/FragmentShader.fragmentshader");
 
+	GLuint Texture = loadBMP_custom(argv[2]);
+	
+	// Get a handle for our "myTextureSampler" uniform
+	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+
+std::vector<glm::vec2> g_uv_buffer_data;
+
+for (int i = 0; i < vertices.size(); i++) {
+	g_uv_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
+	g_uv_buffer_data.push_back(glm::vec2(0.0f, 1.0f));
+	g_uv_buffer_data.push_back(glm::vec2(1.0f, 1.0f));
+}
+	GLuint uvbuffer;
+	glGenBuffers(1, &uvbuffer);
+	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+	glBufferData(GL_ARRAY_BUFFER, g_uv_buffer_data.size() * sizeof(glm::vec2), &g_uv_buffer_data[0], GL_STATIC_DRAW);
+
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
 
@@ -161,6 +178,12 @@ int main(const int argc, const char *argv[]) {
     // in the "MVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	// Set our "myTextureSampler" sampler to use Texture Unit 0
+	glUniform1i(TextureID, 0);
+
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glVertexAttribPointer(0, // attribute. No particular reason for 0, but must
@@ -182,6 +205,18 @@ int main(const int argc, const char *argv[]) {
                           0,        // stride
                           (void *)0 // array buffer offset
     );
+
+	glEnableVertexAttribArray(2);
+		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+		glVertexAttribPointer(
+			2,                                // attribute. No particular reason for 1, but must match the layout in the shader.
+			2,                                // size : U+V => 2
+			GL_FLOAT,                         // type
+			GL_FALSE,                         // normalized?
+			0,                                // stride
+			(void*)0                          // array buffer offset
+		);
+
 
     // Draw the triangle !
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());

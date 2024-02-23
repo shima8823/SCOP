@@ -72,17 +72,13 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar) {
   result[2][2] = -(zFar + zNear) / (zFar - zNear);
   result[3][2] = -(2 * zFar * zNear) / (zFar - zNear);
 
-//   result[2][2] = zFar / (zFar - zNear);
-//   result[3][2] = (-zFar * zNear) / (zFar - zNear);
-
-
   result[2][3] = -1.0f;
 
   return result;
 }
 
 Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
-// f,s,u is vector. why they having vec3 because ワールド座標にするため
+  // f,s,u is vector. why they having vec3 because ワールド座標にするため
   vec3 f = (center - eye).normalize(); // forward vector
   vec3 s = f.cross(up).normalize();    // side vector
   vec3 u = s.cross(f);                 // corrected up vector
@@ -95,7 +91,7 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   result[1][1] = u.y;
   result[2][1] = u.z;
 
-//   なぜマイナスかは、z軸が逆だから
+  //   なぜマイナスかは、z軸が逆だから
   result[0][2] = -f.x;
   result[1][2] = -f.y;
   result[2][2] = -f.z;
@@ -107,4 +103,47 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
 
   return result;
 }
+
+Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
+  float const a = angle;
+  float const c = cos(a);
+  float const s = sin(a);
+
+  vec3 axis(v.normalize());
+  vec3 temp(axis * (1 - c));
+
+  Mat4 Rotate;
+  Rotate[0][0] = c + temp.x * axis.y;
+  Rotate[0][1] = temp.x * axis.y + s * axis.z;
+  Rotate[0][2] = temp.x * axis.z - s * axis.y;
+
+  Rotate[1][0] = temp.y * axis.x - s * axis.z;
+  Rotate[1][1] = c + temp.y * axis.y;
+  Rotate[1][2] = temp.y * axis.z + s * axis.x;
+
+  Rotate[2][0] = temp.x * axis.x + s * axis.y;
+  Rotate[2][1] = temp.x * axis.y - s * axis.x;
+  Rotate[2][2] = c + temp.x * axis.z;
+
+  Mat4 Result;
+
+  // Result[0] = m[0] * Rotate[0][0] + m[1] * Rotate[0][1] + m[2] *
+  // Rotate[0][2];
+  Result[0] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[0][0]),
+                              vec4MulScalar(m[1], Rotate[0][1])),
+                      vec4MulScalar(m[2], Rotate[0][2]));
+  // Result[1] = m[0] * Rotate[1][0] + m[1] * Rotate[1][1] + m[2] *
+  // Rotate[1][2];
+  Result[1] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[1][0]),
+                              vec4MulScalar(m[1], Rotate[1][1])),
+                      vec4MulScalar(m[2], Rotate[1][2]));
+  // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] *
+  // Rotate[2][2];
+  Result[2] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[2][0]),
+                              vec4MulScalar(m[1], Rotate[2][1])),
+                      vec4MulScalar(m[2], Rotate[2][2]));
+  Result[3] = m[3];
+  return Result;
+}
+
 } // namespace ft_glm
