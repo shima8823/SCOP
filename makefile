@@ -42,7 +42,7 @@ leaks: $(NAME)
 	leaks -q -atExit -- ./$(NAME)
 
 format:
-	clang-format -style=file -i $(VPATH)/$(SRCS)
+	clang-format -style=file -i $(VPATH)/* $(INCDIR)/*
 
 # ############################### #
 
