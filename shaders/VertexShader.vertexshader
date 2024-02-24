@@ -3,13 +3,23 @@
 layout(location = 0) in vec3 vertexPosition_modelspace;
 layout(location = 1) in vec3 vertexColor;
 layout(location = 2) in vec2 vertexUV;
-out vec3 fragmentColor;
-uniform mat4 MVP;
+layout(location = 3) in vec3 vertexNormal;
 
+out vec3 fragmentColor;
 out vec2 UV;
+out vec3 Normal; // 法線をフラグメントシェーダーへ渡す
+out vec3 FragPos; // モデル空間の頂点位置をフラグメントシェーダーへ渡す
+
+uniform mat4 MVP;
+uniform mat4 model;
 
 void main(){
     gl_Position = MVP * vec4(vertexPosition_modelspace, 1.0);
 	fragmentColor = vertexColor;	
 	UV = vertexUV;
+	// Normal = vertexNormal; // 法線をそのまま渡す light固定の場合
+	mat3 normalMatrix = transpose(inverse(mat3(model)));
+    Normal = normalize(normalMatrix * vertexNormal);
+
+    FragPos = vec3(model * vec4(vertexPosition_modelspace, 1.0));
 }

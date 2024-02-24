@@ -6,5 +6,6 @@
 ft_glm::Mat4 getViewMatrix();
 ft_glm::Mat4 getProjectionMatrix();
 bool getTexture();
+ft_glm::vec3 getPosition();
 
 void computeMatricesFromInputs(GLFWwindow *window);

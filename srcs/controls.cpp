@@ -10,10 +10,6 @@ using namespace ft_glm;
 Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
-Mat4 getViewMatrix() { return ViewMatrix; }
-Mat4 getProjectionMatrix() { return ProjectionMatrix; }
-bool getTexture() { return texture; }
-
 // Initial position : on +Z
 vec3 position = vec3(0, 4, 13);
 // Initial horizontal angle : toward -Z
@@ -25,6 +21,11 @@ float initialFoV = 45.0f;
 
 float speed = 3.0f; // 3 units / second
 float mouseSpeed = 0.005f;
+
+Mat4 getViewMatrix() { return ViewMatrix; }
+Mat4 getProjectionMatrix() { return ProjectionMatrix; }
+bool getTexture() { return texture; }
+vec3 getPosition() { return position; }
 
 void computeMatricesFromInputs(GLFWwindow *window) {
 

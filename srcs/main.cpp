@@ -66,6 +66,32 @@ bool init() {
   return true;
 }
 
+void calculateNormals(std::vector<ft_glm::vec3> &vertices,
+                      std::vector<ft_glm::vec3> &out_normals) {
+
+  out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+  if (vertices.empty() || vertices.size() % 3 != 0) {
+    std::cerr << "Invalid vertex list." << std::endl;
+    return;
+  }
+
+  out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
+
+  for (size_t i = 0; i < vertices.size(); i += 3) {
+    ft_glm::vec3 v0 = vertices[i];
+    ft_glm::vec3 v1 = vertices[i + 1];
+    ft_glm::vec3 v2 = vertices[i + 2];
+
+    // 面の法線を計算
+    // ft_glm::vec3 normal = ft_glm::normalize(ft_glm::cross(v1 - v0, v2 - v0));
+    ft_glm::vec3 normal = ((v1 - v0).cross(v2 - v0)).normalize();
+
+    // 各頂点に対する法線を更新
+    out_normals[i] = out_normals[i + 1] = out_normals[i + 2] = normal;
+  }
+}
+
 int main(const int argc, const char *argv[]) {
   if (!init()) {
     return -1;
@@ -78,9 +104,10 @@ int main(const int argc, const char *argv[]) {
   std::vector<ft_glm::vec3> vertices;
   std::vector<ft_glm::vec2> uvs;
   std::vector<ft_glm::vec3> normals;
+  std::string materialFilename;
   float limitsX[2] = {0, 0};
   float limitsZ[2] = {0, 0};
-  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ);
+  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ,materialFilename);
 
   if (!res) {
     std::cout << "failed to load obj" << std::endl;
@@ -96,15 +123,15 @@ int main(const int argc, const char *argv[]) {
   GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
   GLuint Texture;
   if (argc > 2) {
-    glUniform1i(useTextureLocation, 0);
-    // テクスチャのバインドやその他の設定
+    glUniform1i(useTextureLocation, 1);
     Texture = loadBMP_custom(argv[2]);
   } else {
-    glUniform1i(useTextureLocation, 10);
+    glUniform1i(useTextureLocation, 0);
   }
 
-  // Get a handle for our "myTextureSampler" uniform
+  //   fragment shader uniform
   GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+  GLuint LightPosID = glGetUniformLocation(programID, "lightPos");
 
   std::vector<glm::vec2> g_uv_buffer_data;
 
@@ -121,14 +148,28 @@ int main(const int argc, const char *argv[]) {
       g_uv_buffer_data.push_back(glm::vec2(uvs[i].x, uvs[i].y));
     }
   }
+
+  if (normals.size() == 0) {
+    std::cout << "no normals" << std::endl;
+    calculateNormals(vertices, normals);
+  } else {
+    std::cout << "normals" << std::endl;
+  }
   GLuint uvbuffer;
   glGenBuffers(1, &uvbuffer);
   glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
   glBufferData(GL_ARRAY_BUFFER, g_uv_buffer_data.size() * sizeof(glm::vec2),
                &g_uv_buffer_data[0], GL_STATIC_DRAW);
 
+  GLuint normalbuffer;
+  glGenBuffers(1, &normalbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+  glBufferData(GL_ARRAY_BUFFER, normals.size() * sizeof(ft_glm::vec3),
+               &normals[0], GL_STATIC_DRAW);
+
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
+  GLuint ModelMatrixID = glGetUniformLocation(programID, "model");
 
   // Hide the mouse and enable unlimited mouvement
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
@@ -209,6 +250,12 @@ int main(const int argc, const char *argv[]) {
     // Send our transformation to the currently bound shader,
     // in the "MVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
+    glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
+
+    // light position from camera view position
+    ft_glm::vec3 cameraPos = getPosition();
+    // glUniform3f(LightPosID, MVP[0][3], MVP[1][3], MVP[2][3]);
+    glUniform3f(LightPosID, cameraPos.x, cameraPos.y, cameraPos.z);
 
     if (argc > 2) {
       // Bind our texture in Texture Unit 0
@@ -229,7 +276,6 @@ int main(const int argc, const char *argv[]) {
                           (void *)0 // array buffer offset
     );
     glEnableVertexAttribArray(1);
-
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     glVertexAttribPointer(1, // attribute. No particular reason for 1, but must
                              // match the layout in the shader.
@@ -245,6 +291,17 @@ int main(const int argc, const char *argv[]) {
     glVertexAttribPointer(2, // attribute. No particular reason for 1, but must
                              // match the layout in the shader.
                           2, // size : U+V => 2
+                          GL_FLOAT, // type
+                          GL_FALSE, // normalized?
+                          0,        // stride
+                          (void *)0 // array buffer offset
+    );
+    // layout(location = 3) in vec3 vertexNormal;
+    glEnableVertexAttribArray(3);
+    glBindBuffer(GL_ARRAY_BUFFER, normalbuffer);
+    glVertexAttribPointer(3, // attribute. No particular reason for 1, but must
+                             // match the layout in the shader.
+                          3, // size : U+V => 2
                           GL_FLOAT, // type
                           GL_FALSE, // normalized?
                           0,        // stride

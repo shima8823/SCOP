@@ -34,10 +34,20 @@ bool includeSlash(const std::string &input) {
   return false;
 }
 
+std::vector<std::string> split(const std::string &s, char delimiter) {
+  std::vector<std::string> tokens;
+  std::string token;
+  std::istringstream tokenStream(s);
+  while (std::getline(tokenStream, token, delimiter)) {
+    tokens.push_back(token);
+  }
+  return tokens;
+}
+
 bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
              std::vector<ft_glm::vec2> &out_uvs,
              std::vector<ft_glm::vec3> &out_normals, float limitsX[2],
-             float limitsZ[2]) {
+             float limitsZ[2], std::string &materialFilename) {
   printf("Loading OBJ file %s...\n", path);
 
   std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
@@ -45,41 +55,37 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
   std::vector<ft_glm::vec2> temp_uvs;
   std::vector<ft_glm::vec3> temp_normals;
 
-  FILE *file = fopen(path, "r");
-  if (file == NULL) {
-    printf("Impossible to open the file ! Are you in the right path ? See "
-           "Tutorial 1 for details\n");
-    getchar();
+  std::cout << "Loading OBJ file " << path << "...\n";
+
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    std::cout << "Impossible to open the file! Are you in the right path?\n";
     return false;
   }
 
-  while (1) {
+  limitsX[0] = std::numeric_limits<float>::max();
+  limitsX[1] = std::numeric_limits<float>::lowest();
+  limitsZ[0] = std::numeric_limits<float>::max();
+  limitsZ[1] = std::numeric_limits<float>::lowest();
 
-    char lineHeader[128];
-    // read the first word of the line
-    int res = fscanf(file, "%s", lineHeader);
-    if (res == EOF)
-      break; // EOF = End Of File. Quit the loop.
+  std::string line;
+  while (std::getline(file, line)) {
 
-    // else : parse lineHeader
+    std::istringstream iss(line);
+    std::string lineHeader;
+    iss >> lineHeader;
 
-    if (strcmp(lineHeader, "v") == 0) {
+    std::cout << "iss = " << iss.str() << std::endl;
+
+    if (lineHeader == "v") {
       ft_glm::vec3 vertex;
-      fscanf(file, "%f %f %f\n", &vertex.x, &vertex.y, &vertex.z);
+      iss >> vertex.x >> vertex.y >> vertex.z;
       temp_vertices.push_back(vertex);
-      if (vertex.x < limitsX[0]) {
-        limitsX[0] = vertex.x;
-      }
-      if (vertex.x > limitsX[1]) {
-        limitsX[1] = vertex.x;
-      }
-      if (vertex.z < limitsZ[0]) {
-        limitsZ[0] = vertex.z;
-      }
-      if (vertex.z > limitsZ[1]) {
-        limitsZ[1] = vertex.z;
-      }
-    } else if (strcmp(lineHeader, "f") == 0) {
+      limitsX[0] = std::min(limitsX[0], vertex.x);
+      limitsX[1] = std::max(limitsX[1], vertex.x);
+      limitsZ[0] = std::min(limitsZ[0], vertex.z);
+      limitsZ[1] = std::max(limitsZ[1], vertex.z);
+    } else if (lineHeader == "f") {
       /*
         f 1/1/1 2/2/2 3/3/3
         or
@@ -88,75 +94,59 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
         f 1 2 3 4 5
       */
 
+      std::string token;
+      std::vector<std::string> tokens;
+      bool isOnlyVertex = true;
+
+      while (iss >> token) {
+        if (token.find_first_not_of("0123456789") != std::string::npos) {
+          isOnlyVertex = false;
+        }
+        tokens.push_back(token);
+        std::cout << "token = " << token << std::endl;
+      }
+      // token = 8/11/7
+      // token = 7/12/7
+      // token = 6/10/7
+
       std::vector<unsigned int> vertexN;
       unsigned int vertexIndex, uvIndex[3], normalIndex[3];
 
-      char *line = NULL;
-      size_t len = 0;
-      getline(&line, &len, file);
+      //   cout size
+      std::cout << "tokens.size() = " << tokens.size() << std::endl;
 
-      char *token = strtok(line, " ");
-      size_t f_index = 0;
-      if (includeSlash(line)) {
-        std::cout << "includeSlash" << std::endl;
-        while (token != NULL) {
-          if (strcmp(token, "f") != 0) {
-            if (f_index < 3) {
-              sscanf(token, "%u", &vertexIndex);
-              vertexN.push_back(vertexIndex);
-            } else if (f_index < 6) {
-              sscanf(token, "%u", &uvIndex[f_index - 3]);
-
-            } else if (f_index < 9) {
-              sscanf(token, "%u", &normalIndex[f_index - 6]);
-            }
-            f_index++;
-          }
-          token = strtok(NULL, " ");
+      if (isOnlyVertex) {
+        for (size_t i = 0; i < tokens.size(); ++i) {
+          vertexN.push_back(std::stof(tokens[i]));
         }
-
+        for (size_t i = 1; i + 1 < vertexN.size(); i++) {
+          vertexIndices.push_back(vertexN[0]);
+          vertexIndices.push_back(vertexN[i]);
+          vertexIndices.push_back(vertexN[i + 1]);
+        }
       } else {
-        while (token != NULL) {
-          // std::cout << "token = " << token;
-          // std::cout << "f_index = " << f_index << std::endl;
-
-          if (strcmp(token, "f") != 0) {
-            sscanf(token, "%u", &vertexIndex);
-            vertexN.push_back(vertexIndex);
-          }
-          token = strtok(NULL, " ");
+        for (size_t i = 0; i < tokens.size(); ++i) {
+          std::vector<std::string> subtokens = split(tokens[i], '/');
+          vertexIndices.push_back(std::stof(subtokens[0]));
+          uvIndices.push_back(std::stof(subtokens[1]));
+          normalIndices.push_back(std::stof(subtokens[2]));
         }
       }
-
-      for (size_t i = 1; i + 1 < vertexN.size(); i++) {
-        vertexIndices.push_back(vertexN[0]);
-        vertexIndices.push_back(vertexN[i]);
-        vertexIndices.push_back(vertexN[i + 1]);
-      }
-      if (f_index > 4) {
-        uvIndices.push_back(uvIndex[0]);
-        uvIndices.push_back(uvIndex[1]);
-        uvIndices.push_back(uvIndex[2]);
-      }
-      if (f_index > 5) {
-        normalIndices.push_back(normalIndex[0]);
-        normalIndices.push_back(normalIndex[1]);
-        normalIndices.push_back(normalIndex[2]);
-      }
-
-    } else if (strcmp(lineHeader, "vt") == 0) {
+    } else if (lineHeader == "vt") {
       ft_glm::vec2 uv;
-      fscanf(file, "%f %f\n", &uv.x, &uv.y);
-
+      iss >> uv.x >> uv.y;
       temp_uvs.push_back(uv);
-    } else if (strcmp(lineHeader, "vn") == 0) {
+    } else if (lineHeader == "vn") {
       ft_glm::vec3 normal;
-      fscanf(file, "%f %f %f\n", &normal.x, &normal.y, &normal.z);
+      iss >> normal.x >> normal.y >> normal.z;
       temp_normals.push_back(normal);
+    } else if (lineHeader == "mtllib") {
+      iss >> materialFilename;
+      std::cout << "materialFilename = " << materialFilename << std::endl;
     } else {
       // Probably a comment, eat up the rest of the line
-      char stupidBuffer[1000];
-      fgets(stupidBuffer, 1000, file);
+      //   char stupidBuffer[1000];
+      //   fgets(stupidBuffer, 1000, file);
     }
   }
 
@@ -170,25 +160,17 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
     out_vertices.push_back(vertex);
   }
 
-  std::cout << "vertexIndices.size() = " << vertexIndices.size() << std::endl;
-  std::cout << "uvIndices.size() = " << uvIndices.size() << std::endl;
-  std::cout << "normalIndices.size() = " << normalIndices.size() << std::endl;
-
   for (size_t i = 0; i < uvIndices.size(); i++) {
     unsigned int uvIndex = uvIndices[i];
     ft_glm::vec2 uv = temp_uvs[uvIndex - 1];
     out_uvs.push_back(uv);
   }
 
-  std::cout << "temp_normals.size() = " << temp_normals.size() << std::endl;
-
   for (size_t i = 0; i < normalIndices.size(); i++) {
     unsigned int normalIndex = normalIndices[i];
     ft_glm::vec3 normal = temp_normals[normalIndex - 1];
     out_normals.push_back(normal);
   }
-
-  fclose(file);
   return true;
 }
 
