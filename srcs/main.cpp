@@ -15,6 +15,8 @@ using namespace std;
 #include "const.hpp"
 #include <random>
 
+GLFWwindow *window;
+
 float getRandom() {
   std::random_device rd; // ランダムなシードを生成するためのデバイス
   std::mt19937 gen(rd()); // メルセンヌ・ツイスターという乱数生成器
@@ -24,11 +26,10 @@ float getRandom() {
   return dis(gen);
 }
 
-int main(const int argc, const char *argv[]) {
-
+bool init() {
   // GLFWライブラリの初期化
   if (!glfwInit())
-    return -1;
+    return false;
 
   glfwWindowHint(GLFW_SAMPLES, 4);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -44,7 +45,7 @@ int main(const int argc, const char *argv[]) {
       glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "Hello World", NULL, NULL);
   if (!window) {
     glfwTerminate();
-    return -1;
+    return false;
   }
 
   //   oepngl shader version: 4.1
@@ -57,44 +58,74 @@ int main(const int argc, const char *argv[]) {
     fprintf(stderr, "Failed to initialize GLEW\n");
     getchar();
     glfwTerminate();
-    return -1;
+    return false;
   }
 
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
   glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+  return true;
+}
 
+int main(const int argc, const char *argv[]) {
+  if (!init()) {
+    return -1;
+  }
   GLuint VertexArrayID;
   glGenVertexArrays(1, &VertexArrayID);
   glBindVertexArray(VertexArrayID);
 
   // Read our .obj file
   std::vector<ft_glm::vec3> vertices;
+  std::vector<ft_glm::vec2> uvs;
+  std::vector<ft_glm::vec3> normals;
   float limitsX[2] = {0, 0};
   float limitsZ[2] = {0, 0};
-  bool res = loadOBJ(argv[1], vertices, limitsX, limitsZ);
+  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ);
 
-  std::cout << (res ? "ok" : "no") << std::endl;
+  if (!res) {
+    std::cout << "failed to load obj" << std::endl;
+    return -1;
+  }
 
   // shader program
   GLuint programID = LoadShaders("shaders/VertexShader.vertexshader",
                                  "shaders/FragmentShader.fragmentshader");
 
-	GLuint Texture = loadBMP_custom(argv[2]);
-	
-	// Get a handle for our "myTextureSampler" uniform
-	GLuint TextureID  = glGetUniformLocation(programID, "myTextureSampler");
+  glUseProgram(programID);
 
-std::vector<glm::vec2> g_uv_buffer_data;
+  GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
+  GLuint Texture;
+  if (argc > 2) {
+    glUniform1i(useTextureLocation, 0);
+    // テクスチャのバインドやその他の設定
+    Texture = loadBMP_custom(argv[2]);
+  } else {
+    glUniform1i(useTextureLocation, 10);
+  }
 
-for (int i = 0; i < vertices.size(); i++) {
-	g_uv_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
-	g_uv_buffer_data.push_back(glm::vec2(0.0f, 1.0f));
-	g_uv_buffer_data.push_back(glm::vec2(1.0f, 1.0f));
-}
-	GLuint uvbuffer;
-	glGenBuffers(1, &uvbuffer);
-	glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-	glBufferData(GL_ARRAY_BUFFER, g_uv_buffer_data.size() * sizeof(glm::vec2), &g_uv_buffer_data[0], GL_STATIC_DRAW);
+  // Get a handle for our "myTextureSampler" uniform
+  GLuint TextureID = glGetUniformLocation(programID, "myTextureSampler");
+
+  std::vector<glm::vec2> g_uv_buffer_data;
+
+  if (uvs.size() == 0) {
+    std::cout << "no uvs" << std::endl;
+    for (int i = 0; i < vertices.size(); i++) {
+      g_uv_buffer_data.push_back(glm::vec2(0.0f, 0.0f));
+      g_uv_buffer_data.push_back(glm::vec2(0.0f, 1.0f));
+      g_uv_buffer_data.push_back(glm::vec2(1.0f, 1.0f));
+    }
+  } else {
+    std::cout << "uvs" << std::endl;
+    for (int i = 0; i < uvs.size(); i++) {
+      g_uv_buffer_data.push_back(glm::vec2(uvs[i].x, uvs[i].y));
+    }
+  }
+  GLuint uvbuffer;
+  glGenBuffers(1, &uvbuffer);
+  glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+  glBufferData(GL_ARRAY_BUFFER, g_uv_buffer_data.size() * sizeof(glm::vec2),
+               &g_uv_buffer_data[0], GL_STATIC_DRAW);
 
   // Get a handle for our "MVP" uniform
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
@@ -148,15 +179,16 @@ for (int i = 0; i < vertices.size(); i++) {
     // レンダリングここから
     // 背景色を設定
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    // glClear(GL_COLOR_BUFFER_BIT);
-
-    // Use our shader
-    glUseProgram(programID);
 
     // Compute the MVP matrix from keyboard and mouse input
-    computeMatricesFromInputs();
+    computeMatricesFromInputs(window);
     ft_glm::Mat4 ProjectionMatrix = getProjectionMatrix();
     ft_glm::Mat4 ViewMatrix = getViewMatrix();
+    if (getTexture()) {
+      glUniform1i(useTextureLocation, 1);
+    } else {
+      glUniform1i(useTextureLocation, 0);
+    }
 
     // rotation 1seconds to ModelMatrix
     // As an example, rotate arount the vertical axis at 180�/sec
@@ -178,11 +210,13 @@ for (int i = 0; i < vertices.size(); i++) {
     // in the "MVP" uniform
     glUniformMatrix4fv(MatrixID, 1, GL_FALSE, &MVP[0][0]);
 
-	// Bind our texture in Texture Unit 0
-	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, Texture);
-	// Set our "myTextureSampler" sampler to use Texture Unit 0
-	glUniform1i(TextureID, 0);
+    if (argc > 2) {
+      // Bind our texture in Texture Unit 0
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, Texture);
+      // Set our "myTextureSampler" sampler to use Texture Unit 0
+      glUniform1i(TextureID, 0);
+    }
 
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -206,17 +240,16 @@ for (int i = 0; i < vertices.size(); i++) {
                           (void *)0 // array buffer offset
     );
 
-	glEnableVertexAttribArray(2);
-		glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-		glVertexAttribPointer(
-			2,                                // attribute. No particular reason for 1, but must match the layout in the shader.
-			2,                                // size : U+V => 2
-			GL_FLOAT,                         // type
-			GL_FALSE,                         // normalized?
-			0,                                // stride
-			(void*)0                          // array buffer offset
-		);
-
+    glEnableVertexAttribArray(2);
+    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+    glVertexAttribPointer(2, // attribute. No particular reason for 1, but must
+                             // match the layout in the shader.
+                          2, // size : U+V => 2
+                          GL_FLOAT, // type
+                          GL_FALSE, // normalized?
+                          0,        // stride
+                          (void *)0 // array buffer offset
+    );
 
     // Draw the triangle !
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());

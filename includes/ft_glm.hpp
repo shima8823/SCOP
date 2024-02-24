@@ -6,10 +6,10 @@
 namespace ft_glm {
 
 class vec2 {
-	public:
-		float x, y;
-	
-		inline vec2(float x = 1.0f, float y = 1.0f) : x(x), y(y) {}
+public:
+  float x, y;
+
+  inline vec2(float x = 1.0f, float y = 1.0f) : x(x), y(y) {}
 };
 
 class vec3 {
@@ -71,7 +71,7 @@ public:
   inline float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
 
   inline vec3 normalize() const {
-	// 方向ベクトルにしている
+    // 方向ベクトルにしている
     float m = magnitude();
     return vec3(x / m, y / m, z / m);
   }
@@ -111,12 +111,14 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar);
 Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up);
 inline double radians(double degrees) { return degrees * (M_PI / 180.0); }
 
-Mat4 rotate(Mat4 const& m, float angle, vec3 const& v);
-inline std::array<float, 4> vec4MulScalar(const std::array<float, 4> &v, float scalar) {
-	  return {v[0] * scalar, v[1] * scalar, v[2] * scalar, v[3] * scalar};
+Mat4 rotate(Mat4 const &m, float angle, vec3 const &v);
+inline std::array<float, 4> vec4MulScalar(const std::array<float, 4> &v,
+                                          float scalar) {
+  return {v[0] * scalar, v[1] * scalar, v[2] * scalar, v[3] * scalar};
 }
 
-inline std::array<float, 4> vec4Add(const std::array<float, 4> &v, const std::array<float, 4> &v2) {
+inline std::array<float, 4> vec4Add(const std::array<float, 4> &v,
+                                    const std::array<float, 4> &v2) {
   return {v[0] + v2[0], v[1] + v2[1], v[2] + v2[2], v[3] + v2[3]};
 }
 } // namespace ft_glm

@@ -96,7 +96,7 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   result[1][2] = -f.y;
   result[2][2] = -f.z;
 
-// これは何表してんの？
+  // これは何表してんの？
   result[3][0] = -s.dot(eye);
   result[3][1] = -u.dot(eye);
   result[3][2] = f.dot(eye);
