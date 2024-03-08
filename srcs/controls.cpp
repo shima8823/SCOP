@@ -67,35 +67,42 @@ void computeMatricesFromInputs(GLFWwindow *window) {
   // Up vector
   vec3 up = cross(right, direction);
 
-  // Move forward
-  if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    position += direction * deltaTime * speed;
-  }
-  // Move backward
-  if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    position -= direction * deltaTime * speed;
-  }
-  // Strafe right
-  if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
-    position += right * deltaTime * speed;
-  }
-  // Strafe left
-  if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
-    position -= right * deltaTime * speed;
-  }
+  // keydown shift + up
   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
       glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
     // world position y is up
-    position += up * deltaTime * speed;
+    position += vec3(0, 1, 0) * deltaTime * speed;
   }
-  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
+
+  // keydown shift + down
+  else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
       glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    position -= up * deltaTime * speed;
+    position -= vec3(0, 1, 0) * deltaTime * speed;
+  }
+  
+  // keydown up
+  else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
+    position += direction * deltaTime * speed;
+  }
+
+  // keydown down
+  else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+    position -= direction * deltaTime * speed;
+  }
+
+  // keydown right
+  else if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS) {
+    position += right * deltaTime * speed;
+  }
+
+  // keydown left
+  else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
+    position -= right * deltaTime * speed;
   }
 
   // keydown t
   //  押されたら1秒間クールダウンを設定
-  if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+  else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
     if (currentTime - lastTimeKeyTPressed >= 1.0) {
       texture = !texture;
       lastTimeKeyTPressed =
