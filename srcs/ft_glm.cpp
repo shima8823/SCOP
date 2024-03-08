@@ -79,9 +79,13 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar) {
 
 Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   // f,s,u is vector. why they having vec3 because ワールド座標にするため
-  vec3 f = (center - eye).normalize(); // forward vector
-  vec3 s = f.cross(up).normalize();    // side vector
-  vec3 u = s.cross(f);                 // corrected up vector
+  vec3 f = center - eye; // forward vector
+  vec3 s = cross(f, up); // side vector
+  vec3 u = cross(s, f); // corrected up vector
+
+  f.normalize();
+  s.normalize();
+  u.normalize();
 
   Mat4 result(1.0f);
   result[0][0] = s.x;
@@ -97,9 +101,9 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   result[2][2] = -f.z;
 
   // これは何表してんの？
-  result[3][0] = -s.dot(eye);
-  result[3][1] = -u.dot(eye);
-  result[3][2] = f.dot(eye);
+  result[3][0] = -s * eye;
+  result[3][1] = -u * eye;
+  result[3][2] = f * eye;
 
   return result;
 }
@@ -109,7 +113,7 @@ Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
   float const c = cos(a);
   float const s = sin(a);
 
-  vec3 axis(v.normalize());
+  vec3 axis(normalize(v));
   vec3 temp(axis * (1 - c));
 
   Mat4 Rotate;

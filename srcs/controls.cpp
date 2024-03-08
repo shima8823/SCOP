@@ -65,7 +65,7 @@ void computeMatricesFromInputs(GLFWwindow *window) {
                     cos(horizontalAngle - 3.14f / 2.0f));
 
   // Up vector
-  vec3 up = right.cross(direction);
+  vec3 up = cross(right, direction);
 
   // Move forward
   if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {

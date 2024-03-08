@@ -22,6 +22,12 @@ public:
   // vec3 = glm::vec3を可能にする
   inline vec3(const glm::vec3 &v) : x(v.x), y(v.y), z(v.z) {}
 
+  inline vec3(const vec3 &v) : x(v.x), y(v.y), z(v.z) {}
+
+  void zero() { x = y = z = 0.0f; }
+
+  vec3 operator -() const { return vec3(-x, -y, -z); }
+
   inline vec3 operator+(const vec3 &v) const {
     return vec3(x + v.x, y + v.y, z + v.z);
   }
@@ -48,34 +54,37 @@ public:
     return *this;
   }
 
-  inline vec3 operator*=(const vec3 &v) {
-    x *= v.x;
-    y *= v.y;
-    z *= v.z;
-    return *this;
-  }
-
-  inline vec3 operator/=(const vec3 &v) {
-    x /= v.x;
-    y /= v.y;
-    z /= v.z;
-    return *this;
-  }
-
-  inline float dot(const vec3 &v) const { return x * v.x + y * v.y + z * v.z; }
-
-  inline vec3 cross(const vec3 &v) const {
-    return vec3(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
-  }
-
-  inline float magnitude() const { return std::sqrt(x * x + y * y + z * z); }
-
-  inline vec3 normalize() const {
+  void normalize() {
     // 方向ベクトルにしている
-    float m = magnitude();
-    return vec3(x / m, y / m, z / m);
+	float magSq = x * x + y * y + z * z;
+	if (magSq > 0.0f) {
+		float oneOverMag = 1.0f / std::sqrt(magSq);
+		x *= oneOverMag;
+		y *= oneOverMag;
+		z *= oneOverMag;
+	}
   }
+
+  // dot product
+  float operator*(const vec3 &v) const { return x * v.x + y * v.y + z * v.z; }
+
 };
+
+// non-member function
+inline float magnitude(const vec3 &v) { return std::sqrt(v.x * v.x + v.y * v.y + v.z * v.z); }
+
+inline vec3 cross(const vec3 &a, const vec3 &b) {
+	return vec3(a.y * b.z - a.z * b.y, a.z * b.x - a.x * b.z, a.x * b.y - a.y * b.x);
+}
+
+inline vec3 normalize(const vec3 &v) {
+  float magSq = v.x * v.x + v.y * v.y + v.z * v.z;
+  if (magSq > 0.0f) {
+	float oneOverMag = 1.0f / std::sqrt(magSq);
+	return vec3(v.x * oneOverMag, v.y * oneOverMag, v.z * oneOverMag);
+  }
+  return vec3(0.0f, 0.0f, 0.0f);
+}
 
 class Mat4 {
 private:
