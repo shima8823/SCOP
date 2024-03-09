@@ -1,5 +1,7 @@
 scop
 local_notes
+.vscode
+.DS_Store
 
 # Prerequisites
 *.d
