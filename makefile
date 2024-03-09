@@ -6,7 +6,7 @@ CPPFLAGS =
 LDFLAGS = 
 LDLIBS = -lglfw -lGLEW -framework OpenGL
 NAME = scop
-INCDIR	=	includes
+INCDIR	=	$(shell brew --prefix glew)/include $(shell brew --prefix glfw)/include $(shell brew --prefix glm)/include includes
 INCS	=	$(addprefix -I,$(INCDIR))
 
 # ########### SRCS ########### #
