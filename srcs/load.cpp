@@ -109,7 +109,7 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
       // token = 7/12/7
       // token = 6/10/7
 
-      std::vector<unsigned int> vertexN;
+      std::vector<unsigned int> vertexN, uvN, normalN;
       unsigned int vertexIndex, uvIndex[3], normalIndex[3];
 
       //   cout size
@@ -127,11 +127,35 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
       } else {
         for (size_t i = 0; i < tokens.size(); ++i) {
           std::vector<std::string> subtokens = split(tokens[i], '/');
-          vertexIndices.push_back(std::stof(subtokens[0]));
-          uvIndices.push_back(std::stof(subtokens[1]));
-          normalIndices.push_back(std::stof(subtokens[2]));
-        }
-      }
+		  std::cout << "subtokens.size() = " << subtokens.size() << std::endl;
+		//  print size
+		  std::cout << "subtokens[0].size() = " << subtokens[0].size() << std::endl;
+		    std::cout << "subtokens[1].size() = " << subtokens[1].size() << std::endl;
+			  std::cout << "subtokens[2].size() = " << subtokens[2].size() << std::endl;
+		 	
+			if (subtokens[0].size() == 0)
+				subtokens[0] = "0";
+			if (subtokens[1].size() == 0)
+				subtokens[1] = "0";
+			if (subtokens[2].size() == 0)
+				subtokens[2] = "0";
+
+				vertexN.push_back(std::stof(subtokens[0]));
+				uvN.push_back(std::stof(subtokens[1]));
+				normalN.push_back(std::stof(subtokens[2]));
+		}
+		for (size_t i = 1; i + 1 < vertexN.size(); i++) {
+		  vertexIndices.push_back(vertexN[0]);
+		  vertexIndices.push_back(vertexN[i]);
+		  vertexIndices.push_back(vertexN[i + 1]);
+		  uvIndices.push_back(uvN[0]);
+		  uvIndices.push_back(uvN[i]);
+		  uvIndices.push_back(uvN[i + 1]);
+		  normalIndices.push_back(normalN[0]);
+		  normalIndices.push_back(normalN[i]);
+		  normalIndices.push_back(normalN[i + 1]);
+		}
+	  }
     } else if (lineHeader == "vt") {
       ft_glm::vec2 uv;
       iss >> uv.x >> uv.y;
@@ -368,4 +392,40 @@ GLuint loadBMP_custom(const char *imagepath) {
 
   // Return the ID of the texture we just created
   return textureID;
+}
+
+bool loadMaterial(const std::string path, Material &material) {
+  std::cout << "Loading material " << path << "...\n";
+
+  std::ifstream file("materials/" + path);
+  if (!file.is_open()) {
+    std::cout << "Impossible to open the file! Are you in the right path?\n";
+    return false;
+  }
+
+  std::string line;
+
+  while (std::getline(file, line)) {
+    std::istringstream iss(line);
+    std::string lineHeader;
+    iss >> lineHeader;
+
+    if (lineHeader == "Ns") {
+      iss >> material.Ns;
+    } else if (lineHeader == "Ka") {
+      iss >> material.Ka.x >> material.Ka.y >> material.Ka.z;
+    } else if (lineHeader == "Kd") {
+      iss >> material.Kd.x >> material.Kd.y >> material.Kd.z;
+    } else if (lineHeader == "Ks") {
+      iss >> material.Ks.x >> material.Ks.y >> material.Ks.z;
+    } else if (lineHeader == "Ni") {
+      iss >> material.Ni;
+    } else if (lineHeader == "d") {
+      iss >> material.d;
+    } else if (lineHeader == "illum") {
+      iss >> material.illum;
+    }
+  }
+
+  return true;
 }
