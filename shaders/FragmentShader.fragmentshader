@@ -18,14 +18,8 @@ uniform float shininess; // マテリアルのshininess
 
 void main()
 {
-	// マテリアルのプロパティを直接コード内に設定
-    vec3 ambientMaterial = vec3(0.0, 0.0, 0.0); // Ka
-    vec3 diffuseMaterial = vec3(0.64, 0.64, 0.64); // Kd
-    vec3 specularMaterial = vec3(0.5, 0.5, 0.5); // Ks
-    float shininess = 96.078431; // Ns
-
 	// vec3 lightPos = vec3(0.0, 0.0, 0.0); // 光源の位置
-    vec3 lightColor = vec3(1.0, 0.0, 0.0); // 光源の色
+    vec3 lightColor = vec3(1.0, 1.0, 1.0); // 光源の色
 
     vec3 ambient = ambientMaterial * lightColor;
 

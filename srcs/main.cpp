@@ -85,7 +85,8 @@ void calculateNormals(std::vector<ft_glm::vec3> &vertices,
 
     // 面の法線を計算
     // ft_glm::vec3 normal = ft_glm::normalize(ft_glm::cross(v1 - v0, v2 - v0));
-    ft_glm::vec3 normal = ((v1 - v0).cross(v2 - v0)).normalize();
+	ft_glm::vec3 normal = ft_glm::cross(v1 - v0, v2 - v0);
+	normal.normalize();
 
     // 各頂点に対する法線を更新
     out_normals[i] = out_normals[i + 1] = out_normals[i + 2] = normal;
@@ -107,10 +108,17 @@ int main(const int argc, const char *argv[]) {
   std::string materialFilename;
   float limitsX[2] = {0, 0};
   float limitsZ[2] = {0, 0};
-  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ,materialFilename);
+  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ,
+                     materialFilename);
 
   if (!res) {
     std::cout << "failed to load obj" << std::endl;
+    return -1;
+  }
+  Material material;
+  res = loadMaterial(materialFilename, material);
+  if (!res) {
+    std::cout << "failed to load material" << std::endl;
     return -1;
   }
 
@@ -120,7 +128,17 @@ int main(const int argc, const char *argv[]) {
 
   glUseProgram(programID);
 
+  GLuint ambientLocation = glGetUniformLocation(programID, "ambientMaterial");
+  GLuint diffuseLocation = glGetUniformLocation(programID, "diffuseMaterial");
+  GLuint specularLocation = glGetUniformLocation(programID, "specularMaterial");
+  GLuint shininessLocation = glGetUniformLocation(programID, "shininess");
   GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
+
+  glUniform3f(ambientLocation, material.Ka.x, material.Ka.y, material.Ka.z);
+  glUniform3f(diffuseLocation, material.Kd.x, material.Kd.y, material.Kd.z);
+  glUniform3f(specularLocation, material.Ks.x, material.Ks.y, material.Ks.z);
+  glUniform1f(shininessLocation, material.Ns);
+
   GLuint Texture;
   if (argc > 2) {
     glUniform1i(useTextureLocation, 1);
