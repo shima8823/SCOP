@@ -85,8 +85,8 @@ void calculateNormals(std::vector<ft_glm::vec3> &vertices,
 
     // 面の法線を計算
     // ft_glm::vec3 normal = ft_glm::normalize(ft_glm::cross(v1 - v0, v2 - v0));
-	ft_glm::vec3 normal = ft_glm::cross(v1 - v0, v2 - v0);
-	normal.normalize();
+    ft_glm::vec3 normal = ft_glm::cross(v1 - v0, v2 - v0);
+    normal.normalize();
 
     // 各頂点に対する法線を更新
     out_normals[i] = out_normals[i + 1] = out_normals[i + 2] = normal;
@@ -112,8 +112,8 @@ int main(const int argc, const char *argv[]) {
                      materialFilename);
 
   if (!res) {
-    std::cout << "failed to load obj" << std::endl;
-    return -1;
+    std::cout << "Error: Object file failed to load." << std::endl;
+    exit(EXIT_FAILURE);
   }
   Material material;
   res = loadMaterial(materialFilename, material);
@@ -125,6 +125,11 @@ int main(const int argc, const char *argv[]) {
   // shader program
   GLuint programID = LoadShaders("shaders/VertexShader.vertexshader",
                                  "shaders/FragmentShader.fragmentshader");
+
+  if (programID == 0) {
+    std::cerr << "Error: Shader program failed to load." << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   glUseProgram(programID);
 
