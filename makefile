@@ -10,7 +10,7 @@ INCDIR	=	$(shell brew --prefix glew)/include $(shell brew --prefix glfw)/include
 INCS	=	$(addprefix -I,$(INCDIR))
 
 # ########### SRCS ########### #
-SRCS = main.cpp load.cpp ft_glm.cpp controls.cpp
+SRCS = main.cpp ft_glm.cpp controls.cpp load_obj.cpp load_bmp.cpp load_shader.cpp load_material.cpp
 VPATH = srcs
 # ############################ #
 
