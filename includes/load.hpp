@@ -3,6 +3,13 @@
 #include "ft_glm.hpp"
 #include <vector>
 
+// file limits
+const unsigned int MAX_LINE_LENGTH = 1024;
+const unsigned int MAX_LINE_COUNT = 100000;
+
+// bmp file
+const unsigned int MAX_FILE_SIZE = 4096;
+
 struct Material {
   float Ns;
   ft_glm::vec3 Ka;

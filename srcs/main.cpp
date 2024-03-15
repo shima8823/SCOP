@@ -118,8 +118,7 @@ int main(const int argc, const char *argv[]) {
   Material material;
   res = load_material(materialFilename, material);
   if (!res) {
-    std::cout << "failed to load material" << std::endl;
-    return -1;
+    std::cout << "Failed to load material" << std::endl;
   }
 
   // shader program

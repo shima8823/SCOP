@@ -16,8 +16,19 @@ bool load_material(const std::string &path, Material &material) {
   }
 
   std::string line;
-
+  size_t lineCount = 0;
   while (std::getline(file, line)) {
+    if (line.length() > MAX_LINE_LENGTH) {
+      std::cerr << "Error: Line exceeds maximum length of " << MAX_LINE_LENGTH
+                << " characters." << std::endl;
+      return false;
+    }
+    if (lineCount > MAX_LINE_COUNT) {
+      std::cerr << "Error: File exceeds maximum line count of "
+                << MAX_LINE_COUNT << "." << std::endl;
+      return false;
+    }
+
     std::istringstream iss(line);
     std::string lineHeader;
     iss >> lineHeader;

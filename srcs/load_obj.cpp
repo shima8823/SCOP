@@ -6,9 +6,6 @@
 
 #include "load.hpp"
 
-const size_t MAX_LINE_LENGTH = 1024;
-const size_t MAX_LINE_COUNT = 100000;
-
 std::vector<std::string> split(const std::string &s, char delimiter) {
   std::vector<std::string> tokens;
   std::string token;

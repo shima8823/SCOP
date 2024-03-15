@@ -28,6 +28,13 @@ GLuint load_bmp(const std::string &path) {
   unsigned int width = *reinterpret_cast<unsigned int *>(&header[0x12]);
   unsigned int height = *reinterpret_cast<unsigned int *>(&header[0x16]);
 
+  if (width > MAX_FILE_SIZE || height > MAX_FILE_SIZE) {
+    std::cerr << "BMP file is too large: " << width << "x" << height
+              << std::endl;
+    file.close();
+    return 0;
+  }
+
   if (imageSize == 0)
     imageSize = width * height * 3;
   if (dataPos == 0)
