@@ -76,10 +76,10 @@ void computeMatricesFromInputs(GLFWwindow *window) {
 
   // keydown shift + down
   else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
-      glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
+           glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
     position -= vec3(0, 1, 0) * deltaTime * speed;
   }
-  
+
   // keydown up
   else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
     position += direction * deltaTime * speed;

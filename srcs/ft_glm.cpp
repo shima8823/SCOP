@@ -81,7 +81,7 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   // f,s,u is vector. why they having vec3 because ワールド座標にするため
   vec3 f = center - eye; // forward vector
   vec3 s = cross(f, up); // side vector
-  vec3 u = cross(s, f); // corrected up vector
+  vec3 u = cross(s, f);  // corrected up vector
 
   f.normalize();
   s.normalize();
