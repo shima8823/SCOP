@@ -125,7 +125,7 @@ bool load_object(const std::string &path,
   std::vector<ft_glm::vec2> temp_uvs;
   std::vector<ft_glm::vec3> temp_normals;
 
-  std::cout << "Loading OBJ file " << path << "...\n";
+  std::cout << "Loading object " << path << "...\n";
 
   std::ifstream file(path);
   if (!file.is_open())

@@ -80,8 +80,7 @@ GLuint load_shaders(const std::string &vertex_file_path,
     std::vector<char> programErrorMessage(std::max(infoLogLength, 1));
     glGetProgramInfoLog(programID, infoLogLength, NULL,
                         &programErrorMessage[0]);
-    std::cerr << "Shader program linking failed: " << &programErrorMessage[0]
-              << "\n";
+    std::cerr << "Shader program linking failed: " << &programErrorMessage[0];
 
     glDeleteProgram(programID);
     glDetachShader(programID, vertexShaderID);
@@ -96,7 +95,7 @@ GLuint load_shaders(const std::string &vertex_file_path,
     std::vector<char> programErrorMessage(infoLogLength + 1);
     glGetProgramInfoLog(programID, infoLogLength, NULL,
                         &programErrorMessage[0]);
-    std::cerr << "Shader program link log: " << &programErrorMessage[0] << "\n";
+    std::cerr << "Shader program link log: " << &programErrorMessage[0];
   }
 
   glDetachShader(programID, vertexShaderID);

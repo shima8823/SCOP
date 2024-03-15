@@ -7,7 +7,7 @@
 #include "load.hpp"
 
 GLuint load_bmp(const std::string &path) {
-  std::cout << "Reading image " << path << std::endl;
+  std::cout << "Loading bmp " << path << "..." << std::endl;
 
   std::ifstream file(path, std::ios::binary);
   if (!file.is_open()) {

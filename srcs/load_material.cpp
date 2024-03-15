@@ -36,6 +36,8 @@ bool load_material(const std::string &path, Material &material) {
       iss >> material.d;
     } else if (lineHeader == "illum") {
       iss >> material.illum;
+    } else {
+      continue;
     }
     if (iss.fail())
       std::cerr << "Material log: Failed to parse line: " << line << std::endl;
