@@ -6,33 +6,8 @@
 
 #include "load.hpp"
 
-std::vector<std::string> splitString(const std::string &input) {
-  std::istringstream stream(input);
-  std::vector<std::string> tokens;
-  std::string token;
-
-  while (stream >> token) {
-    tokens.push_back(token);
-  }
-
-  return tokens;
-}
-
-// 文字列がどの形式か判定する関数
-bool includeSlash(const std::string &input) {
-  auto tokens = splitString(input);
-
-  // 最初のトークンを除いた各トークンをチェック
-  for (size_t i = 1; i < tokens.size(); ++i) {
-    if (tokens[i].find('/') != std::string::npos) {
-      // std::cout << "Format: f 1/1/1 2/2/2 3/3/3" << std::endl;
-      return true;
-    }
-  }
-
-  // std::cout << "Format: f 1 2 3 (or with more vertices)" << std::endl;
-  return false;
-}
+const size_t MAX_LINE_LENGTH = 1024;
+const size_t MAX_LINE_COUNT = 100000;
 
 std::vector<std::string> split(const std::string &s, char delimiter) {
   std::vector<std::string> tokens;
@@ -44,12 +19,106 @@ std::vector<std::string> split(const std::string &s, char delimiter) {
   return tokens;
 }
 
+bool parseVertex(const std::string &line, ft_glm::vec3 &vertex,
+                 float limitsX[2], float limitsZ[2]) {
+  std::istringstream iss(line);
+  std::string prefix;
+  iss >> prefix;
+  if (!(iss >> vertex.x >> vertex.y >> vertex.z)) {
+    std::cerr << "Error: Failed to parse vertex coordinates from line: " << line
+              << std::endl;
+    return false;
+  }
+  limitsX[0] = std::min(limitsX[0], vertex.x);
+  limitsX[1] = std::max(limitsX[1], vertex.x);
+  limitsZ[0] = std::min(limitsZ[0], vertex.z);
+  limitsZ[1] = std::max(limitsZ[1], vertex.z);
+  return true;
+}
+
+bool parseFace(const std::vector<std::string> &tokens, bool isOnlyVertex,
+               std::vector<unsigned int> &vertexIndices,
+               std::vector<unsigned int> &uvIndices,
+               std::vector<unsigned int> &normalIndices) {
+  std::vector<unsigned int> vertexN, uvN, normalN;
+  try {
+    for (const std::string &token : tokens) {
+      std::vector<std::string> subtokens = split(token, '/');
+      if (subtokens.empty())
+        throw std::invalid_argument("Empty token.");
+
+      unsigned int vIndex = std::stoi(subtokens[0]);
+      unsigned int uvIndex = subtokens.size() > 1 && !subtokens[1].empty()
+                                 ? std::stoi(subtokens[1])
+                                 : 0;
+      unsigned int nIndex = subtokens.size() > 2 && !subtokens[2].empty()
+                                ? std::stoi(subtokens[2])
+                                : 0;
+
+      vertexN.push_back(vIndex);
+      if (!isOnlyVertex) {
+        uvN.push_back(uvIndex);
+        normalN.push_back(nIndex);
+      }
+    }
+
+    for (size_t i = 1; i + 1 < vertexN.size(); ++i) {
+      vertexIndices.push_back(vertexN[0]);
+      vertexIndices.push_back(vertexN[i]);
+      vertexIndices.push_back(vertexN[i + 1]);
+      if (!isOnlyVertex) {
+        uvIndices.push_back(uvN[0]);
+        uvIndices.push_back(uvN[i]);
+        uvIndices.push_back(uvN[i + 1]);
+        normalIndices.push_back(normalN[0]);
+        normalIndices.push_back(normalN[i]);
+        normalIndices.push_back(normalN[i + 1]);
+      }
+    }
+  } catch (const std::invalid_argument &e) {
+    std::cerr << "Invalid argument during face parsing: " << e.what()
+              << std::endl;
+    return false;
+  } catch (const std::out_of_range &e) {
+    std::cerr << "Value out of range during face parsing: " << e.what()
+              << std::endl;
+    return false;
+  } catch (...) {
+    std::cerr << "Unknown error during face parsing." << std::endl;
+    return false;
+  }
+
+  return true;
+}
+
+bool parseUV(const std::string &line, ft_glm::vec2 &uv) {
+  std::istringstream iss(line);
+  std::string prefix;
+  iss >> prefix;
+  if (!(iss >> uv.x >> uv.y)) {
+    std::cerr << "Error: Failed to parse UV coordinates from line: " << line
+              << std::endl;
+    return false;
+  }
+  return true;
+}
+
+bool parseNormal(const std::string &line, ft_glm::vec3 &normal) {
+  std::istringstream iss(line);
+  std::string prefix;
+  iss >> prefix;
+  if (!(iss >> normal.x >> normal.y >> normal.z)) {
+    std::cerr << "Error: Failed to parse normal coordinates from line: " << line
+              << std::endl;
+    return false;
+  }
+  return true;
+}
+
 bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
              std::vector<ft_glm::vec2> &out_uvs,
              std::vector<ft_glm::vec3> &out_normals, float limitsX[2],
              float limitsZ[2], std::string &materialFilename) {
-  printf("Loading OBJ file %s...\n", path);
-
   std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
   std::vector<ft_glm::vec3> temp_vertices;
   std::vector<ft_glm::vec2> temp_uvs;
@@ -58,10 +127,8 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
   std::cout << "Loading OBJ file " << path << "...\n";
 
   std::ifstream file(path);
-  if (!file.is_open()) {
-    std::cout << "Impossible to open the file! Are you in the right path?\n";
+  if (!file.is_open())
     return false;
-  }
 
   limitsX[0] = std::numeric_limits<float>::max();
   limitsX[1] = std::numeric_limits<float>::lowest();
@@ -69,132 +136,71 @@ bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
   limitsZ[1] = std::numeric_limits<float>::lowest();
 
   std::string line;
+  size_t lineCount = 0;
   while (std::getline(file, line)) {
+    lineCount++;
+    if (line.length() > MAX_LINE_LENGTH) {
+      std::cerr << "Error: Line exceeds maximum length of " << MAX_LINE_LENGTH
+                << " characters." << std::endl;
+      return false;
+    }
+    if (lineCount > MAX_LINE_COUNT) {
+      std::cerr << "Error: File exceeds maximum line count of "
+                << MAX_LINE_COUNT << "." << std::endl;
+      return false;
+    }
 
     std::istringstream iss(line);
     std::string lineHeader;
     iss >> lineHeader;
 
-    std::cout << "iss = " << iss.str() << std::endl;
-
     if (lineHeader == "v") {
       ft_glm::vec3 vertex;
-      iss >> vertex.x >> vertex.y >> vertex.z;
+      if (!parseVertex(line, vertex, limitsX, limitsZ))
+        return false;
       temp_vertices.push_back(vertex);
-      limitsX[0] = std::min(limitsX[0], vertex.x);
-      limitsX[1] = std::max(limitsX[1], vertex.x);
-      limitsZ[0] = std::min(limitsZ[0], vertex.z);
-      limitsZ[1] = std::max(limitsZ[1], vertex.z);
+    } else if (lineHeader == "vt") {
+      ft_glm::vec2 uv;
+      if (!parseUV(line, uv))
+        return false;
+      temp_uvs.push_back(uv);
+    } else if (lineHeader == "vn") {
+      ft_glm::vec3 normal;
+      if (!parseNormal(line, normal))
+        return false;
+      temp_normals.push_back(normal);
     } else if (lineHeader == "f") {
       /*
         f 1/1/1 2/2/2 3/3/3
+        f 1/1/1 2/2/2 3/3/3 4/4/4
         or
         f 1 2 3
         f 1 2 3 4
         f 1 2 3 4 5
       */
-
       std::string token;
       std::vector<std::string> tokens;
-      bool isOnlyVertex = true;
+      bool isOnlyVertex = line.find('/') == std::string::npos;
 
       while (iss >> token) {
-        if (token.find_first_not_of("0123456789") != std::string::npos) {
-          isOnlyVertex = false;
-        }
         tokens.push_back(token);
-        std::cout << "token = " << token << std::endl;
       }
-      // token = 8/11/7
-      // token = 7/12/7
-      // token = 6/10/7
 
-      std::vector<unsigned int> vertexN, uvN, normalN;
-      unsigned int vertexIndex, uvIndex[3], normalIndex[3];
-
-      //   cout size
-      std::cout << "tokens.size() = " << tokens.size() << std::endl;
-
-      if (isOnlyVertex) {
-        for (size_t i = 0; i < tokens.size(); ++i) {
-          vertexN.push_back(std::stof(tokens[i]));
-        }
-        for (size_t i = 1; i + 1 < vertexN.size(); i++) {
-          vertexIndices.push_back(vertexN[0]);
-          vertexIndices.push_back(vertexN[i]);
-          vertexIndices.push_back(vertexN[i + 1]);
-        }
-      } else {
-        for (size_t i = 0; i < tokens.size(); ++i) {
-          std::vector<std::string> subtokens = split(tokens[i], '/');
-		  std::cout << "subtokens.size() = " << subtokens.size() << std::endl;
-		//  print size
-		  std::cout << "subtokens[0].size() = " << subtokens[0].size() << std::endl;
-		    std::cout << "subtokens[1].size() = " << subtokens[1].size() << std::endl;
-			  std::cout << "subtokens[2].size() = " << subtokens[2].size() << std::endl;
-		 	
-			if (subtokens[0].size() == 0)
-				subtokens[0] = "0";
-			if (subtokens[1].size() == 0)
-				subtokens[1] = "0";
-			if (subtokens[2].size() == 0)
-				subtokens[2] = "0";
-
-				vertexN.push_back(std::stof(subtokens[0]));
-				uvN.push_back(std::stof(subtokens[1]));
-				normalN.push_back(std::stof(subtokens[2]));
-		}
-		for (size_t i = 1; i + 1 < vertexN.size(); i++) {
-		  vertexIndices.push_back(vertexN[0]);
-		  vertexIndices.push_back(vertexN[i]);
-		  vertexIndices.push_back(vertexN[i + 1]);
-		  uvIndices.push_back(uvN[0]);
-		  uvIndices.push_back(uvN[i]);
-		  uvIndices.push_back(uvN[i + 1]);
-		  normalIndices.push_back(normalN[0]);
-		  normalIndices.push_back(normalN[i]);
-		  normalIndices.push_back(normalN[i + 1]);
-		}
-	  }
-    } else if (lineHeader == "vt") {
-      ft_glm::vec2 uv;
-      iss >> uv.x >> uv.y;
-      temp_uvs.push_back(uv);
-    } else if (lineHeader == "vn") {
-      ft_glm::vec3 normal;
-      iss >> normal.x >> normal.y >> normal.z;
-      temp_normals.push_back(normal);
+      if (!parseFace(tokens, isOnlyVertex, vertexIndices, uvIndices,
+                     normalIndices))
+        return false;
     } else if (lineHeader == "mtllib") {
       iss >> materialFilename;
-      std::cout << "materialFilename = " << materialFilename << std::endl;
-    } else {
-      // Probably a comment, eat up the rest of the line
-      //   char stupidBuffer[1000];
-      //   fgets(stupidBuffer, 1000, file);
     }
   }
 
-  // For each vertex of each triangle
-  for (unsigned int i = 0; i < vertexIndices.size(); i++) {
-    unsigned int vertexIndex = vertexIndices[i];
-    // Get the attributes thanks to the index
-    ft_glm::vec3 vertex = temp_vertices[vertexIndex - 1];
+  for (size_t i = 0; i < vertexIndices.size(); i++)
+    out_vertices.push_back(temp_vertices[vertexIndices[i] - 1]);
+  for (size_t i = 0; i < uvIndices.size(); i++)
+    out_uvs.push_back(temp_uvs[uvIndices[i] - 1]);
+  for (size_t i = 0; i < normalIndices.size(); i++)
+    out_normals.push_back(temp_normals[normalIndices[i] - 1]);
 
-    // Put the attributes in buffers
-    out_vertices.push_back(vertex);
-  }
-
-  for (size_t i = 0; i < uvIndices.size(); i++) {
-    unsigned int uvIndex = uvIndices[i];
-    ft_glm::vec2 uv = temp_uvs[uvIndex - 1];
-    out_uvs.push_back(uv);
-  }
-
-  for (size_t i = 0; i < normalIndices.size(); i++) {
-    unsigned int normalIndex = normalIndices[i];
-    ft_glm::vec3 normal = temp_normals[normalIndex - 1];
-    out_normals.push_back(normal);
-  }
   return true;
 }
 
