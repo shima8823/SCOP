@@ -115,10 +115,11 @@ bool parseNormal(const std::string &line, ft_glm::vec3 &normal) {
   return true;
 }
 
-bool loadOBJ(const char *path, std::vector<ft_glm::vec3> &out_vertices,
-             std::vector<ft_glm::vec2> &out_uvs,
-             std::vector<ft_glm::vec3> &out_normals, float limitsX[2],
-             float limitsZ[2], std::string &materialFilename) {
+bool load_object(const std::string &path,
+                 std::vector<ft_glm::vec3> &out_vertices,
+                 std::vector<ft_glm::vec2> &out_uvs,
+                 std::vector<ft_glm::vec3> &out_normals, float limitsX[2],
+                 float limitsZ[2], std::string &materialFilename) {
   std::vector<unsigned int> vertexIndices, uvIndices, normalIndices;
   std::vector<ft_glm::vec3> temp_vertices;
   std::vector<ft_glm::vec2> temp_uvs;

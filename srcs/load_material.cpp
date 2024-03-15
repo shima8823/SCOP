@@ -6,12 +6,12 @@
 
 #include "load.hpp"
 
-bool loadMaterial(const std::string path, Material &material) {
-  std::cout << "Loading material " << path << "...\n";
+bool load_material(const std::string &path, Material &material) {
+  std::cout << "Loading material " << path << "..." << std::endl;
 
   std::ifstream file("materials/" + path);
   if (!file.is_open()) {
-    std::cout << "Impossible to open the file! Are you in the right path?\n";
+    std::cerr << "Failed to open " << path << " file." << std::endl;
     return false;
   }
 
@@ -37,6 +37,8 @@ bool loadMaterial(const std::string path, Material &material) {
     } else if (lineHeader == "illum") {
       iss >> material.illum;
     }
+    if (iss.fail())
+      std::cerr << "Material log: Failed to parse line: " << line << std::endl;
   }
 
   return true;

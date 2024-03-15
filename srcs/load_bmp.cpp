@@ -6,12 +6,12 @@
 
 #include "load.hpp"
 
-GLuint loadBMP_custom(const char *imagepath) {
-  std::cout << "Reading image " << imagepath << std::endl;
+GLuint load_bmp(const std::string &path) {
+  std::cout << "Reading image " << path << std::endl;
 
-  std::ifstream file(imagepath, std::ios::binary);
+  std::ifstream file(path, std::ios::binary);
   if (!file.is_open()) {
-    std::cerr << imagepath << "Failed to open." << std::endl;
+    std::cerr << path << "Failed to open." << std::endl;
     return 0;
   }
 

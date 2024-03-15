@@ -108,23 +108,23 @@ int main(const int argc, const char *argv[]) {
   std::string materialFilename;
   float limitsX[2] = {0, 0};
   float limitsZ[2] = {0, 0};
-  bool res = loadOBJ(argv[1], vertices, uvs, normals, limitsX, limitsZ,
-                     materialFilename);
+  bool res = load_object(argv[1], vertices, uvs, normals, limitsX, limitsZ,
+                         materialFilename);
 
   if (!res) {
     std::cout << "Error: Object file failed to load." << std::endl;
     exit(EXIT_FAILURE);
   }
   Material material;
-  res = loadMaterial(materialFilename, material);
+  res = load_material(materialFilename, material);
   if (!res) {
     std::cout << "failed to load material" << std::endl;
     return -1;
   }
 
   // shader program
-  GLuint programID = LoadShaders("shaders/VertexShader.vertexshader",
-                                 "shaders/FragmentShader.fragmentshader");
+  GLuint programID = load_shaders("shaders/VertexShader.vertexshader",
+                                  "shaders/FragmentShader.fragmentshader");
 
   if (programID == 0) {
     std::cerr << "Error: Shader program failed to load." << std::endl;
@@ -147,7 +147,7 @@ int main(const int argc, const char *argv[]) {
   GLuint Texture;
   if (argc > 2) {
     glUniform1i(useTextureLocation, 1);
-    Texture = loadBMP_custom(argv[2]);
+    Texture = load_bmp(argv[2]);
   } else {
     glUniform1i(useTextureLocation, 0);
   }

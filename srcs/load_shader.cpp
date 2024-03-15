@@ -6,7 +6,7 @@
 
 #include "load.hpp"
 
-std::string ReadShaderFromFile(const char *shaderPath) {
+std::string ReadShaderFromFile(const std::string &shaderPath) {
   std::ifstream shaderStream(shaderPath);
   if (!shaderStream.is_open()) {
     std::cerr << "Impossible to open " << shaderPath << ".\n";
@@ -18,7 +18,7 @@ std::string ReadShaderFromFile(const char *shaderPath) {
   return sstr.str();
 }
 
-GLuint CompileShader(const char *path, GLenum shaderType) {
+GLuint CompileShader(const std::string &path, GLenum shaderType) {
   std::string shaderCode = ReadShaderFromFile(path);
   if (shaderCode.empty())
     return 0;
@@ -55,8 +55,8 @@ GLuint CompileShader(const char *path, GLenum shaderType) {
   return shaderID;
 }
 
-GLuint LoadShaders(const char *vertex_file_path,
-                   const char *fragment_file_path) {
+GLuint load_shaders(const std::string &vertex_file_path,
+                    const std::string &fragment_file_path) {
   GLuint vertexShaderID = CompileShader(vertex_file_path, GL_VERTEX_SHADER);
   GLuint fragmentShaderID =
       CompileShader(fragment_file_path, GL_FRAGMENT_SHADER);
