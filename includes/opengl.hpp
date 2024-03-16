@@ -10,3 +10,10 @@
 #include <glm/gtx/euler_angles.hpp>
 #include <glm/gtx/norm.hpp>
 #include <glm/gtx/quaternion.hpp>
+
+struct Vertexbufferobject {
+  GLuint vertex;
+  GLuint uv;
+  GLuint normal;
+  GLuint color;
+};
