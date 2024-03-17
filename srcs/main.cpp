@@ -62,7 +62,7 @@ bool init() {
   return true;
 }
 
-void calculateNormals(std::vector<ft_glm::vec3> &vertices,
+void calculateNormals(const std::vector<ft_glm::vec3> &vertices,
                       std::vector<ft_glm::vec3> &out_normals) {
 
   out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
@@ -172,6 +172,26 @@ GLuint setupTexture(const int argc, const char *argv[], GLuint useTextureLocatio
     return Texture;
 }
 
+void fillBufferVectors(const std::vector<ft_glm::vec3>& vertices, const std::vector<ft_glm::vec2>& uvs, std::vector<ft_glm::vec3>& normals, std::vector<ft_glm::vec2>& uvBuffer, std::vector<ft_glm::vec3>& colorBuffer) {
+    if (uvs.empty()) {
+        for (size_t i = 0; i < vertices.size(); i++) {
+            uvBuffer.emplace_back(0.0f, 0.0f);
+            uvBuffer.emplace_back(0.0f, 1.0f);
+            uvBuffer.emplace_back(1.0f, 1.0f);
+        }
+    } else {
+        uvBuffer.assign(uvs.begin(), uvs.end());
+    }
+
+    if (normals.empty()) {
+        calculateNormals(vertices, normals);
+    }
+
+    for (size_t i = 0; i < vertices.size(); ++i) {
+        colorBuffer.emplace_back(getRandom(), getRandom(), getRandom());
+    }
+}
+
 void sendUniforms(GLuint programID, Material &material) {
   GLuint ambientLocation = glGetUniformLocation(programID, "ambientMaterial");
   GLuint diffuseLocation = glGetUniformLocation(programID, "diffuseMaterial");
@@ -216,36 +236,14 @@ int main(const int argc, const char *argv[]) {
     std::cout << "Failed to load material" << std::endl;
   }
 
-  sendUniforms(programID, material);
-
-  // texture
-  GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
-
-  GLuint Texture = setupTexture(argc, argv, useTextureLocation);
-
   std::vector<ft_glm::vec2> g_uv_buffer_data;
   std::vector<ft_glm::vec3> g_color_buffer_data;
 
-  if (uvs.size() == 0) {
-    for (int i = 0; i < vertices.size(); i++) {
-      g_uv_buffer_data.push_back(ft_glm::vec2(0.0f, 0.0f));
-      g_uv_buffer_data.push_back(ft_glm::vec2(0.0f, 1.0f));
-      g_uv_buffer_data.push_back(ft_glm::vec2(1.0f, 1.0f));
-    }
-  } else {
-    for (int i = 0; i < uvs.size(); i++)
-      g_uv_buffer_data.push_back(ft_glm::vec2(uvs[i].x, uvs[i].y));
-  }
+  fillBufferVectors(vertices, uvs, normals, g_uv_buffer_data, g_color_buffer_data);
+  sendUniforms(programID, material);
 
-  if (normals.size() == 0) {
-    calculateNormals(vertices, normals);
-  }
-
-  for (int i = 0; i < vertices.size(); i++) {
-    g_color_buffer_data.push_back(
-        ft_glm::vec3(getRandom(), getRandom(), getRandom()));
-  }
-
+  GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
+  GLuint Texture = setupTexture(argc, argv, useTextureLocation);
   GLuint MatrixID      = glGetUniformLocation(programID, "MVP");
   GLuint ModelMatrixID = glGetUniformLocation(programID, "model");
   GLuint LightPosID    = glGetUniformLocation(programID, "lightPos");
@@ -299,7 +297,6 @@ int main(const int argc, const char *argv[]) {
 
     glm::mat4 TranslationMatrix = glm::translate(glm::mat4(1.0f), -gPosition1);
     // glm::mat4 RotationMatrix = glm::rotate(glm::mat4(1.0f), gOrientation1.y,
-    // glm::vec3(0,1,0));
     glm::mat4 RotationMatrix =
         glm::rotate(glm::mat4(1.0f), gOrientation1.y, gOrientation1);
     glm::mat4 BackTranslationMatrix =
