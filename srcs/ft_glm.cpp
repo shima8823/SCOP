@@ -31,16 +31,6 @@ Mat4 Mat4::operator-(const Mat4 &other) const {
   return result;
 }
 
-Mat4 Mat4::operator*(float scalar) const {
-  Mat4 result(0.0f);
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      result[i][j] = mat[i][j] * scalar;
-    }
-  }
-  return result;
-}
-
 Mat4 Mat4::operator*(const Mat4 &other) const {
   Mat4 result(0.0f);
   for (int i = 0; i < 4; ++i) {   // 結果行列の各列に対して
@@ -106,6 +96,12 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   result[3][2] = f * eye;
 
   return result;
+}
+
+Mat4 translate(Mat4 const &m, vec3 const &v) {
+  Mat4 Result = m;
+  Result[3] = m[0] * v.x + m[1] * v.y + m[2] * v.z + m[3];
+  return Result;
 }
 
 Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {

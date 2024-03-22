@@ -104,15 +104,14 @@ public:
     }
   }
 
-  inline std::array<float, 4> &operator[](int index) { return mat[index]; }
+  inline std::array<float, 4> &operator[](size_t index) { return mat[index]; }
 
-  inline const std::array<float, 4> &operator[](int index) const {
+  inline const std::array<float, 4> &operator[](size_t index) const {
     return mat[index];
   }
 
   Mat4 operator+(const Mat4 &other) const;
   Mat4 operator-(const Mat4 &other) const;
-  Mat4 operator*(float scalar) const;
   Mat4 operator*(const Mat4 &other) const;
 
   void print() const;
@@ -122,7 +121,9 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar);
 Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up);
 inline double radians(double degrees) { return degrees * (M_PI / 180.0); }
 
+Mat4 translate(Mat4 const &m, vec3 const &v);
 Mat4 rotate(Mat4 const &m, float angle, vec3 const &v);
+
 inline std::array<float, 4> vec4MulScalar(const std::array<float, 4> &v,
                                           float scalar) {
   return {v[0] * scalar, v[1] * scalar, v[2] * scalar, v[3] * scalar};
@@ -132,4 +133,14 @@ inline std::array<float, 4> vec4Add(const std::array<float, 4> &v,
                                     const std::array<float, 4> &v2) {
   return {v[0] + v2[0], v[1] + v2[1], v[2] + v2[2], v[3] + v2[3]};
 }
+
+inline std::array<float, 4> operator*(const std::array<float, 4> &v,
+                                      float scalar) {
+  return {v[0] * scalar, v[1] * scalar, v[2] * scalar, v[3] * scalar};
+}
+inline std::array<float, 4> operator+(const std::array<float, 4> &v1,
+                                      const std::array<float, 4> &v2) {
+  return {v1[0] + v2[0], v1[1] + v2[1], v1[2] + v2[2], v1[3] + v2[3]};
+}
+
 } // namespace ft_glm

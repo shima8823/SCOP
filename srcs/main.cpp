@@ -295,12 +295,12 @@ int main(const int argc, const char *argv[]) {
 
     gOrientation1.y += 3.14159f / 2.0f * deltaTime;
 
-    glm::mat4 TranslationMatrix = glm::translate(glm::mat4(1.0f), -gPosition1);
+    ft_glm::Mat4 TranslationMatrix = ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
     // glm::mat4 RotationMatrix = glm::rotate(glm::mat4(1.0f), gOrientation1.y,
     glm::mat4 RotationMatrix =
         glm::rotate(glm::mat4(1.0f), gOrientation1.y, gOrientation1);
-    glm::mat4 BackTranslationMatrix =
-        glm::translate(glm::mat4(1.0f), gPosition1);
+    ft_glm::Mat4 BackTranslationMatrix =
+        ft_glm::translate(ft_glm::Mat4(1.0f), gPosition1);
     ft_glm::Mat4 ModelMatrix =
         BackTranslationMatrix * RotationMatrix * TranslationMatrix;
 
