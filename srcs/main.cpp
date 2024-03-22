@@ -59,7 +59,7 @@ bool init() {
   }
 
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
-  glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
+  glClearColor(0.25f, 0.25f, 0.25f, 0.0f);
   return true;
 }
 
