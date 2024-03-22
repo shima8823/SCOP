@@ -83,6 +83,7 @@ Mat4 translate(Mat4 const &m, vec3 const &v) {
 }
 
 Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
+  // ロドリゲスの回転公式
   float const a = angle;
   float const c = cos(a);
   float const s = sin(a);
@@ -91,20 +92,19 @@ Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
   vec3 temp(axis * (1 - c));
 
   Mat4 Rotate;
-  Rotate[0][0] = c + temp.x * axis.y;
-  Rotate[0][1] = temp.x * axis.y + s * axis.z;
-  Rotate[0][2] = temp.x * axis.z - s * axis.y;
+  Rotate[0][0] = axis.x * temp.x + c;
+  Rotate[0][1] = axis.x * temp.y + axis.z * s;
+  Rotate[0][2] = axis.x * temp.z - axis.y * s;
 
-  Rotate[1][0] = temp.y * axis.x - s * axis.z;
-  Rotate[1][1] = c + temp.y * axis.y;
-  Rotate[1][2] = temp.y * axis.z + s * axis.x;
+  Rotate[1][0] = axis.x * temp.y - axis.z * s;
+  Rotate[1][1] = axis.y * temp.y + c;
+  Rotate[1][2] = axis.y * temp.z + axis.x * s;
 
-  Rotate[2][0] = temp.x * axis.x + s * axis.y;
-  Rotate[2][1] = temp.x * axis.y - s * axis.x;
-  Rotate[2][2] = c + temp.x * axis.z;
+  Rotate[2][0] = axis.x * temp.z + axis.y * s;
+  Rotate[2][1] = axis.y * temp.z - axis.x * s;
+  Rotate[2][2] = axis.z * temp.z + c;
 
   Mat4 Result;
-
   Result[0] = m[0] * Rotate[0][0] + m[1] * Rotate[0][1] + m[2] * Rotate[0][2];
   Result[1] = m[0] * Rotate[1][0] + m[1] * Rotate[1][1] + m[2] * Rotate[1][2];
   Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
