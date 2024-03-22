@@ -126,33 +126,15 @@ void setupVertexBuffers(Vertexbufferobject &vbo,
 
   glEnableVertexAttribArray(1);
   glBindBuffer(GL_ARRAY_BUFFER, vbo.color);
-  glVertexAttribPointer(1,
-                        3,        // size
-                        GL_FLOAT, // type
-                        GL_FALSE, // normalized?
-                        0,        // stride
-                        (void *)0 // array buffer offset
-  );
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
   glEnableVertexAttribArray(2);
   glBindBuffer(GL_ARRAY_BUFFER, vbo.uv);
-  glVertexAttribPointer(2,
-                        2,        // size : U+V => 2
-                        GL_FLOAT, // type
-                        GL_FALSE, // normalized?
-                        0,        // stride
-                        (void *)0 // array buffer offset
-  );
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 0, (void *)0);
 
   glEnableVertexAttribArray(3);
   glBindBuffer(GL_ARRAY_BUFFER, vbo.normal);
-  glVertexAttribPointer(3,
-                        3,        // size : U+V => 2
-                        GL_FLOAT, // type
-                        GL_FALSE, // normalized?
-                        0,        // stride
-                        (void *)0 // array buffer offset
-  );
+  glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 0, (void *)0);
   glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
@@ -261,7 +243,6 @@ int main(const int argc, const char *argv[]) {
   // メインループのための変数
   double lastTime = glfwGetTime();
   double lastFrameTime = lastTime;
-  int nbFrames = 0;
 
   float initialPositionX = (limitsX[0] + limitsX[1]) / 2.0f;
   float initialPositionZ = (limitsZ[0] + limitsZ[1]) / 2.0f;
@@ -279,14 +260,6 @@ int main(const int argc, const char *argv[]) {
     double currentTime = glfwGetTime();
     float deltaTime = (float)(currentTime - lastFrameTime);
     lastFrameTime = currentTime;
-    nbFrames++;
-    if (currentTime - lastTime >=
-        1.0) { // If last prinf() was more than 1sec ago
-      // printf and reset
-      printf("%f ms/frame\n", 1000.0 / double(nbFrames));
-      nbFrames = 0;
-      lastTime += 1.0;
-    }
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vao);
@@ -304,8 +277,8 @@ int main(const int argc, const char *argv[]) {
 
     ft_glm::Mat4 TranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
-    ft_glm::Mat4 RotationMatrix = ft_glm::rotate(
-        ft_glm::Mat4(1.0f), angle, ft_glm::vec3(0, 1, 0));
+    ft_glm::Mat4 RotationMatrix =
+        ft_glm::rotate(ft_glm::Mat4(1.0f), angle, ft_glm::vec3(0, 1, 0));
     ft_glm::Mat4 BackTranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), gPosition1);
     ft_glm::Mat4 ModelMatrix =
