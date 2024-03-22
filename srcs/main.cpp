@@ -17,6 +17,8 @@ using namespace std;
 
 GLFWwindow *window;
 
+const float ROTATE_SPEED = 3.14159f / 2.0f; // 90 degrees per second
+
 float getRandom() {
   std::random_device rd; // ランダムなシードを生成するためのデバイス
   std::mt19937 gen(rd()); // メルセンヌ・ツイスターという乱数生成器
@@ -263,8 +265,8 @@ int main(const int argc, const char *argv[]) {
 
   float initialPositionX = (limitsX[0] + limitsX[1]) / 2.0f;
   float initialPositionZ = (limitsZ[0] + limitsZ[1]) / 2.0f;
-  glm::vec3 gPosition1(initialPositionX, 0.0f, initialPositionZ);
-  glm::vec3 gOrientation1(0.0f, 0.0f, 0.0f);
+  ft_glm::vec3 gPosition1(initialPositionX, 0.0f, initialPositionZ);
+  float angle = 0.0f;
   GLuint vao;
   Vertexbufferobject vbo;
   glGenVertexArrays(1, &vao);
@@ -298,12 +300,12 @@ int main(const int argc, const char *argv[]) {
       glUniform1i(useTextureLocation, 0);
     }
 
-    gOrientation1.y += 3.14159f / 2.0f * deltaTime;
+    angle += ROTATE_SPEED * deltaTime;
 
     ft_glm::Mat4 TranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
-    ft_glm::Mat4 RotationMatrix =
-        ft_glm::rotate(ft_glm::Mat4(1.0f), gOrientation1.y, gOrientation1);
+    ft_glm::Mat4 RotationMatrix = ft_glm::rotate(
+        ft_glm::Mat4(1.0f), angle, ft_glm::vec3(0, 1, 0));
     ft_glm::Mat4 BackTranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), gPosition1);
     ft_glm::Mat4 ModelMatrix =
