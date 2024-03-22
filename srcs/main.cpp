@@ -39,8 +39,7 @@ bool init() {
   glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
 
-  window =
-      glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "scop", NULL, NULL);
+  window = glfwCreateWindow(SCREEN_WIDTH, SCREEN_HEIGHT, "scop", NULL, NULL);
   if (!window) {
     glfwTerminate();
     return false;
@@ -152,44 +151,49 @@ void setupVertexBuffers(Vertexbufferobject &vbo,
                         0,        // stride
                         (void *)0 // array buffer offset
   );
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+  glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-GLuint setupTexture(const int argc, const char *argv[], GLuint useTextureLocation) {
-    GLuint Texture = 0;
-    if (argc > 2) {
-        glUniform1i(useTextureLocation, 1);
-        Texture = load_bmp(argv[2]);
-        if (Texture == 0) {
-            std::cerr << "Error: Texture failed to load." << std::endl;
-        } else {
-            glActiveTexture(GL_TEXTURE0);
-            glBindTexture(GL_TEXTURE_2D, Texture);
-        }
+GLuint setupTexture(const int argc, const char *argv[],
+                    GLuint useTextureLocation) {
+  GLuint Texture = 0;
+  if (argc > 2) {
+    glUniform1i(useTextureLocation, 1);
+    Texture = load_bmp(argv[2]);
+    if (Texture == 0) {
+      std::cerr << "Error: Texture failed to load." << std::endl;
     } else {
-        glUniform1i(useTextureLocation, 0);
+      glActiveTexture(GL_TEXTURE0);
+      glBindTexture(GL_TEXTURE_2D, Texture);
     }
-    return Texture;
+  } else {
+    glUniform1i(useTextureLocation, 0);
+  }
+  return Texture;
 }
 
-void fillBufferVectors(const std::vector<ft_glm::vec3>& vertices, const std::vector<ft_glm::vec2>& uvs, std::vector<ft_glm::vec3>& normals, std::vector<ft_glm::vec2>& uvBuffer, std::vector<ft_glm::vec3>& colorBuffer) {
-    if (uvs.empty()) {
-        for (size_t i = 0; i < vertices.size(); i++) {
-            uvBuffer.emplace_back(0.0f, 0.0f);
-            uvBuffer.emplace_back(0.0f, 1.0f);
-            uvBuffer.emplace_back(1.0f, 1.0f);
-        }
-    } else {
-        uvBuffer.assign(uvs.begin(), uvs.end());
+void fillBufferVectors(const std::vector<ft_glm::vec3> &vertices,
+                       const std::vector<ft_glm::vec2> &uvs,
+                       std::vector<ft_glm::vec3> &normals,
+                       std::vector<ft_glm::vec2> &uvBuffer,
+                       std::vector<ft_glm::vec3> &colorBuffer) {
+  if (uvs.empty()) {
+    for (size_t i = 0; i < vertices.size(); i++) {
+      uvBuffer.emplace_back(0.0f, 0.0f);
+      uvBuffer.emplace_back(0.0f, 1.0f);
+      uvBuffer.emplace_back(1.0f, 1.0f);
     }
+  } else {
+    uvBuffer.assign(uvs.begin(), uvs.end());
+  }
 
-    if (normals.empty()) {
-        calculateNormals(vertices, normals);
-    }
+  if (normals.empty()) {
+    calculateNormals(vertices, normals);
+  }
 
-    for (size_t i = 0; i < vertices.size(); ++i) {
-        colorBuffer.emplace_back(getRandom(), getRandom(), getRandom());
-    }
+  for (size_t i = 0; i < vertices.size(); ++i) {
+    colorBuffer.emplace_back(getRandom(), getRandom(), getRandom());
+  }
 }
 
 void sendUniforms(GLuint programID, Material &material) {
@@ -239,14 +243,15 @@ int main(const int argc, const char *argv[]) {
   std::vector<ft_glm::vec2> g_uv_buffer_data;
   std::vector<ft_glm::vec3> g_color_buffer_data;
 
-  fillBufferVectors(vertices, uvs, normals, g_uv_buffer_data, g_color_buffer_data);
+  fillBufferVectors(vertices, uvs, normals, g_uv_buffer_data,
+                    g_color_buffer_data);
   sendUniforms(programID, material);
 
   GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
   GLuint Texture = setupTexture(argc, argv, useTextureLocation);
-  GLuint MatrixID      = glGetUniformLocation(programID, "MVP");
+  GLuint MatrixID = glGetUniformLocation(programID, "MVP");
   GLuint ModelMatrixID = glGetUniformLocation(programID, "model");
-  GLuint LightPosID    = glGetUniformLocation(programID, "lightPos");
+  GLuint LightPosID = glGetUniformLocation(programID, "lightPos");
 
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
@@ -260,7 +265,7 @@ int main(const int argc, const char *argv[]) {
   float initialPositionZ = (limitsZ[0] + limitsZ[1]) / 2.0f;
   glm::vec3 gPosition1(initialPositionX, 0.0f, initialPositionZ);
   glm::vec3 gOrientation1(0.0f, 0.0f, 0.0f);
-  GLuint             vao;
+  GLuint vao;
   Vertexbufferobject vbo;
   glGenVertexArrays(1, &vao);
   glBindVertexArray(vao);
@@ -295,10 +300,10 @@ int main(const int argc, const char *argv[]) {
 
     gOrientation1.y += 3.14159f / 2.0f * deltaTime;
 
-    ft_glm::Mat4 TranslationMatrix = ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
-    // glm::mat4 RotationMatrix = glm::rotate(glm::mat4(1.0f), gOrientation1.y,
-    glm::mat4 RotationMatrix =
-        glm::rotate(glm::mat4(1.0f), gOrientation1.y, gOrientation1);
+    ft_glm::Mat4 TranslationMatrix =
+        ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
+    ft_glm::Mat4 RotationMatrix =
+        ft_glm::rotate(ft_glm::Mat4(1.0f), gOrientation1.y, gOrientation1);
     ft_glm::Mat4 BackTranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), gPosition1);
     ft_glm::Mat4 ModelMatrix =

@@ -10,16 +10,12 @@ using namespace ft_glm;
 Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
-// Initial position : on +Z
 vec3 position = vec3(0, 4, 13);
-// Initial horizontal angle : toward -Z
 float horizontalAngle = 3.14f;
-// Initial vertical angle : none
 float verticalAngle = 0.0f;
-// Initial Field of View
 float initialFoV = 45.0f;
 
-float speed = 3.0f; // 3 units / second
+float speed = 3.0f;
 float mouseSpeed = 0.005f;
 
 Mat4 getViewMatrix() { return ViewMatrix; }
@@ -41,13 +37,6 @@ void computeMatricesFromInputs(GLFWwindow *window) {
   // Get mouse position
   double xpos, ypos;
   glfwGetCursorPos(window, &xpos, &ypos);
-  if (xpos < 0 || SCREEN_WIDTH < xpos || ypos < 0 || SCREEN_HEIGHT < ypos ||
-      xpos < ypos) {
-    xpos = SCREEN_WIDTH / 2;
-    ypos = SCREEN_HEIGHT / 2;
-  }
-
-  //   std::cout << "xpos: " << xpos << " ypos: " << ypos << std::endl;
 
   // Reset mouse position for next frame
   glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);

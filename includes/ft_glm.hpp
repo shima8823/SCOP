@@ -110,8 +110,6 @@ public:
     return mat[index];
   }
 
-  Mat4 operator+(const Mat4 &other) const;
-  Mat4 operator-(const Mat4 &other) const;
   Mat4 operator*(const Mat4 &other) const;
 
   void print() const;
@@ -123,16 +121,6 @@ inline double radians(double degrees) { return degrees * (M_PI / 180.0); }
 
 Mat4 translate(Mat4 const &m, vec3 const &v);
 Mat4 rotate(Mat4 const &m, float angle, vec3 const &v);
-
-inline std::array<float, 4> vec4MulScalar(const std::array<float, 4> &v,
-                                          float scalar) {
-  return {v[0] * scalar, v[1] * scalar, v[2] * scalar, v[3] * scalar};
-}
-
-inline std::array<float, 4> vec4Add(const std::array<float, 4> &v,
-                                    const std::array<float, 4> &v2) {
-  return {v[0] + v2[0], v[1] + v2[1], v[2] + v2[2], v[3] + v2[3]};
-}
 
 inline std::array<float, 4> operator*(const std::array<float, 4> &v,
                                       float scalar) {
