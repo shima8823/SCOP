@@ -112,6 +112,15 @@ bool parseNormal(const std::string &line, ft_glm::vec3 &normal) {
   return true;
 }
 
+bool isObjFile(const std::string& path) {
+    if (path.length() < 4) {
+        return false;
+    }
+    
+    std::string extension = path.substr(path.length() - 4);
+    return (extension == ".obj");
+}
+
 bool load_object(const std::string &path,
                  std::vector<ft_glm::vec3> &out_vertices,
                  std::vector<ft_glm::vec2> &out_uvs,
@@ -123,6 +132,11 @@ bool load_object(const std::string &path,
   std::vector<ft_glm::vec3> temp_normals;
 
   std::cout << "Loading object " << path << "...\n";
+
+  if (!isObjFile(path)) {
+	std::cerr << "Error: File is not an .obj file." << std::endl;
+	return false;
+  }
 
   std::ifstream file(path);
   if (!file.is_open())
@@ -192,12 +206,15 @@ bool load_object(const std::string &path,
     }
   }
 
-  for (size_t i = 0; i < vertexIndices.size(); i++)
-    out_vertices.push_back(temp_vertices[vertexIndices[i] - 1]);
-  for (size_t i = 0; i < uvIndices.size(); i++)
-    out_uvs.push_back(temp_uvs[uvIndices[i] - 1]);
-  for (size_t i = 0; i < normalIndices.size(); i++)
-    out_normals.push_back(temp_normals[normalIndices[i] - 1]);
+  if (temp_vertices.size() > 0)
+    for (size_t i = 0; i < vertexIndices.size(); i++)
+      out_vertices.push_back(temp_vertices[vertexIndices[i] - 1]);
+  if (temp_uvs.size() > 0)
+    for (size_t i = 0; i < uvIndices.size(); i++)
+      out_uvs.push_back(temp_uvs[uvIndices[i] - 1]);
+  if (temp_normals.size() > 0)
+    for (size_t i = 0; i < normalIndices.size(); i++)
+      out_normals.push_back(temp_normals[normalIndices[i] - 1]);
 
   return true;
 }
