@@ -19,15 +19,6 @@ GLFWwindow *window;
 
 const float ROTATE_SPEED = M_PI / 2.0f; // 90 degrees per second
 
-float getRandom() {
-  std::random_device rd; // ランダムなシードを生成するためのデバイス
-  std::mt19937 gen(rd()); // メルセンヌ・ツイスターという乱数生成器
-  std::uniform_real_distribution<float> dis(0.0,
-                                            1.0); // 0.0から1.0までの一様分布
-
-  return dis(gen);
-}
-
 bool init() {
   if (!glfwInit())
     return false;
@@ -56,6 +47,16 @@ bool init() {
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
   glClearColor(0.25f, 0.25f, 0.25f, 0.0f);
   return true;
+}
+
+float getRandom() {
+  static std::random_device rd; // ランダムなシードを生成するためのデバイス
+  static std::mt19937 gen(rd()); // メルセンヌ・ツイスターという乱数生成器
+  static std::uniform_real_distribution<float> dis(
+      0.0,
+      1.0); // 0.0から1.0までの一様分布
+
+  return dis(gen);
 }
 
 void calculateNormals(const std::vector<ft_glm::vec3> &vertices,
