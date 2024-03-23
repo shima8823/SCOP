@@ -9,6 +9,7 @@ out vec3 color;
 
 uniform sampler2D myTextureSampler;
 uniform int useTexture;
+uniform int isRainbow;
 uniform vec3 lightPos; // 光源の位置
 uniform vec3 lightColor; // 光源の色
 uniform vec3 ambientMaterial; // マテリアルのambient成分
@@ -18,7 +19,7 @@ uniform float shininess; // マテリアルのshininess
 
 void main()
 {
-	// vec3 lightPos = vec3(0.0, 0.0, 0.0); // 光源の位置
+    // vec3 lightPos = vec3(0.0, 0.0, 0.0); // 光源の位置
     vec3 lightColor = vec3(1.0, 1.0, 1.0); // 光源の色
 
     vec3 ambient = ambientMaterial * lightColor;
@@ -42,8 +43,14 @@ void main()
     if (useTexture > 0) {
         result *= texture(myTextureSampler, UV).rgb;
     } else {
-        result *= vec3(1.0, 1.0, 1.0); // マテリアルの色を使用しない場合、白色を乗算
+        if (isRainbow > 0) {
+            result *= fragmentColor;
+        } else {
+            result *= vec3(1.0, 1.0, 1.0);
+        }
     }
+
+
     color = result;
-	
+    
 }
