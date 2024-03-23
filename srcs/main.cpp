@@ -220,6 +220,7 @@ int main(const int argc, const char *argv[]) {
   sendUniforms(programID, material);
 
   GLuint useTextureLocation = glGetUniformLocation(programID, "useTexture");
+  GLuint isRainbowLocation = glGetUniformLocation(programID, "isRainbow");
   GLuint Texture = setupTexture(argc, argv, useTextureLocation);
   GLuint MatrixID = glGetUniformLocation(programID, "MVP");
   GLuint ModelMatrixID = glGetUniformLocation(programID, "model");
@@ -259,7 +260,13 @@ int main(const int argc, const char *argv[]) {
       glUniform1i(useTextureLocation, 0);
     }
 
-	ft_glm::vec3 rotationAxis = getRotationAxis();
+    if ((getIsRainbow())) {
+      glUniform1i(isRainbowLocation, 1);
+    } else {
+      glUniform1i(isRainbowLocation, 0);
+    }
+
+    ft_glm::vec3 rotationAxis = getRotationAxis();
     angle += ROTATE_SPEED * deltaTime;
 
     ft_glm::Mat4 TranslationMatrix =

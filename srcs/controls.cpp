@@ -8,6 +8,7 @@ using namespace ft_glm;
 Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
+bool isRainbow = false;
 vec3 position = vec3(0, 4, 13);
 vec3 rotationAxis = vec3(0, 1, 0);
 float horizontalAngle = M_PI;
@@ -19,6 +20,7 @@ float mouseSpeed = 0.005f;
 Mat4 getViewMatrix() { return ViewMatrix; }
 Mat4 getProjectionMatrix() { return ProjectionMatrix; }
 bool getTexture() { return texture; }
+bool getIsRainbow() { return isRainbow; }
 vec3 getPosition() { return position; }
 vec3 getRotationAxis() { return rotationAxis; }
 
@@ -88,7 +90,7 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     // keydown f
     else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
       if (currentTime - lastTimeKeyTPressed >= 1.0) {
-        // rainbow
+        isRainbow = !isRainbow;
         lastTimeKeyTPressed = currentTime;
       }
     }
