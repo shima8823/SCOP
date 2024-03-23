@@ -17,7 +17,7 @@ using namespace std;
 
 GLFWwindow *window;
 
-const float ROTATE_SPEED = 3.14159f / 2.0f; // 90 degrees per second
+const float ROTATE_SPEED = M_PI / 2.0f; // 90 degrees per second
 
 float getRandom() {
   std::random_device rd; // ランダムなシードを生成するためのデバイス
@@ -29,7 +29,6 @@ float getRandom() {
 }
 
 bool init() {
-  // GLFWライブラリの初期化
   if (!glfwInit())
     return false;
 
@@ -46,18 +45,15 @@ bool init() {
     glfwTerminate();
     return false;
   }
-
   glfwMakeContextCurrent(window);
   glEnable(GL_DEPTH_TEST);
-
-  glewExperimental = true; // Needed for core profile
+  glewExperimental = true;
   if (glewInit() != GLEW_OK) {
-    fprintf(stderr, "Failed to initialize GLEW\n");
+	std::cerr << "Failed to initialize GLEW" << std::endl;
     getchar();
     glfwTerminate();
     return false;
   }
-
   glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
   glClearColor(0.25f, 0.25f, 0.25f, 0.0f);
   return true;
@@ -65,14 +61,10 @@ bool init() {
 
 void calculateNormals(const std::vector<ft_glm::vec3> &vertices,
                       std::vector<ft_glm::vec3> &out_normals) {
-
-  out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
-
   if (vertices.empty() || vertices.size() % 3 != 0) {
     std::cerr << "Invalid vertex list." << std::endl;
     return;
   }
-
   out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
 
   for (size_t i = 0; i < vertices.size(); i += 3) {
@@ -80,12 +72,9 @@ void calculateNormals(const std::vector<ft_glm::vec3> &vertices,
     ft_glm::vec3 v1 = vertices[i + 1];
     ft_glm::vec3 v2 = vertices[i + 2];
 
-    // 面の法線を計算
-    // ft_glm::vec3 normal = ft_glm::normalize(ft_glm::cross(v1 - v0, v2 - v0));
     ft_glm::vec3 normal = ft_glm::cross(v1 - v0, v2 - v0);
     normal.normalize();
 
-    // 各頂点に対する法線を更新
     out_normals[i] = out_normals[i + 1] = out_normals[i + 2] = normal;
   }
 }
@@ -240,10 +229,8 @@ int main(const int argc, const char *argv[]) {
   glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
   glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-  // メインループのための変数
   double lastTime = glfwGetTime();
   double lastFrameTime = lastTime;
-
   float initialPositionX = (limitsX[0] + limitsX[1]) / 2.0f;
   float initialPositionZ = (limitsZ[0] + limitsZ[1]) / 2.0f;
   ft_glm::vec3 gPosition1(initialPositionX, 0.0f, initialPositionZ);
