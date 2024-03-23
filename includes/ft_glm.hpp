@@ -1,7 +1,6 @@
 #pragma once
 
 #include <array>
-#include <glm/glm.hpp>
 
 namespace ft_glm {
 
@@ -18,9 +17,6 @@ public:
 
   inline vec3(float x = 1.0f, float y = 1.0f, float z = 1.0f)
       : x(x), y(y), z(z) {}
-
-  // vec3 = glm::vec3を可能にする
-  inline vec3(const glm::vec3 &v) : x(v.x), y(v.y), z(v.z) {}
 
   inline vec3(const vec3 &v) : x(v.x), y(v.y), z(v.z) {}
 
@@ -94,15 +90,6 @@ private:
 
 public:
   Mat4(float defaulValue = 1.0f);
-
-  // Mat4 = glm::mat4を可能にする
-  inline Mat4(const glm::mat4 &m) {
-    for (int i = 0; i < 4; ++i) {
-      for (int j = 0; j < 4; ++j) {
-        mat[i][j] = m[i][j];
-      }
-    }
-  }
 
   inline std::array<float, 4> &operator[](size_t index) { return mat[index]; }
 

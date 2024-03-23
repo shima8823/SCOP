@@ -1,8 +1,6 @@
 #include "controls.hpp"
 
 #include "const.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 using namespace ft_glm;
@@ -14,7 +12,6 @@ vec3 position = vec3(0, 4, 13);
 float horizontalAngle = M_PI;
 float verticalAngle = 0.0f;
 float initialFoV = 45.0f;
-
 float speed = 3.0f;
 float mouseSpeed = 0.005f;
 
@@ -42,7 +39,6 @@ void computeMatricesFromInputs(GLFWwindow *window) {
                  cos(verticalAngle) * cos(horizontalAngle));
   vec3 right = vec3(sin(horizontalAngle - M_PI / 2.0f), 0,
                     cos(horizontalAngle - M_PI / 2.0f));
-  // Up vector
   vec3 up = cross(right, direction);
 
   // keydown shift + up

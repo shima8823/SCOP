@@ -47,9 +47,8 @@ bool init() {
   }
   glfwMakeContextCurrent(window);
   glEnable(GL_DEPTH_TEST);
-  glewExperimental = true;
   if (glewInit() != GLEW_OK) {
-	std::cerr << "Failed to initialize GLEW" << std::endl;
+    std::cerr << "Failed to initialize GLEW" << std::endl;
     getchar();
     glfwTerminate();
     return false;
@@ -65,7 +64,7 @@ void calculateNormals(const std::vector<ft_glm::vec3> &vertices,
     std::cerr << "Invalid vertex list." << std::endl;
     return;
   }
-  out_normals.resize(vertices.size(), glm::vec3(0.0f, 0.0f, 0.0f));
+  out_normals.resize(vertices.size(), ft_glm::vec3(0.0f, 0.0f, 0.0f));
 
   for (size_t i = 0; i < vertices.size(); i += 3) {
     ft_glm::vec3 v0 = vertices[i];
