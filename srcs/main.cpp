@@ -1,19 +1,13 @@
-#include "opengl.hpp"
+#include <iostream>
 #include <vector>
-
 #include <cmath>
+#include <random>
 
+#include "opengl.hpp"
 #include "ft_glm.hpp"
 #include "load.hpp"
-
-#include <iostream>
-
 #include "controls.hpp"
-
-using namespace std;
-
 #include "const.hpp"
-#include <random>
 
 GLFWwindow *window;
 

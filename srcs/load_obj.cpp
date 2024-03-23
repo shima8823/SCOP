@@ -112,13 +112,13 @@ bool parseNormal(const std::string &line, ft_glm::vec3 &normal) {
   return true;
 }
 
-bool isObjFile(const std::string& path) {
-    if (path.length() < 4) {
-        return false;
-    }
-    
-    std::string extension = path.substr(path.length() - 4);
-    return (extension == ".obj");
+bool isObjFile(const std::string &path) {
+  if (path.length() < 4) {
+    return false;
+  }
+
+  std::string extension = path.substr(path.length() - 4);
+  return (extension == ".obj");
 }
 
 bool load_object(const std::string &path,
@@ -134,8 +134,8 @@ bool load_object(const std::string &path,
   std::cout << "Loading object " << path << "...\n";
 
   if (!isObjFile(path)) {
-	std::cerr << "Error: File is not an .obj file." << std::endl;
-	return false;
+    std::cerr << "Error: File is not an .obj file." << std::endl;
+    return false;
   }
 
   std::ifstream file(path);

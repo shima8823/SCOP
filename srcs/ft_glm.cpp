@@ -1,5 +1,6 @@
-#include "ft_glm.hpp"
 #include <iostream>
+
+#include "ft_glm.hpp"
 
 namespace ft_glm {
 

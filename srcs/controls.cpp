@@ -1,7 +1,7 @@
-#include "controls.hpp"
-
-#include "const.hpp"
 #include <iostream>
+
+#include "controls.hpp"
+#include "const.hpp"
 
 using namespace ft_glm;
 
