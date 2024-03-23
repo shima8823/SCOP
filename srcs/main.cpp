@@ -259,12 +259,13 @@ int main(const int argc, const char *argv[]) {
       glUniform1i(useTextureLocation, 0);
     }
 
+	ft_glm::vec3 rotationAxis = getRotationAxis();
     angle += ROTATE_SPEED * deltaTime;
 
     ft_glm::Mat4 TranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), -gPosition1);
     ft_glm::Mat4 RotationMatrix =
-        ft_glm::rotate(ft_glm::Mat4(1.0f), angle, ft_glm::vec3(0, 1, 0));
+        ft_glm::rotate(ft_glm::Mat4(1.0f), angle, rotationAxis);
     ft_glm::Mat4 BackTranslationMatrix =
         ft_glm::translate(ft_glm::Mat4(1.0f), gPosition1);
     ft_glm::Mat4 ModelMatrix =

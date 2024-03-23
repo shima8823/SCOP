@@ -7,5 +7,6 @@ ft_glm::Mat4 getViewMatrix();
 ft_glm::Mat4 getProjectionMatrix();
 bool getTexture();
 ft_glm::vec3 getPosition();
+ft_glm::vec3 getRotationAxis();
 
 void computeMatricesFromInputs(GLFWwindow *window);

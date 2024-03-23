@@ -9,6 +9,7 @@ Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
 vec3 position = vec3(0, 4, 13);
+vec3 rotationAxis = vec3(0, 1, 0);
 float horizontalAngle = M_PI;
 float verticalAngle = 0.0f;
 float initialFoV = 45.0f;
@@ -19,6 +20,7 @@ Mat4 getViewMatrix() { return ViewMatrix; }
 Mat4 getProjectionMatrix() { return ProjectionMatrix; }
 bool getTexture() { return texture; }
 vec3 getPosition() { return position; }
+vec3 getRotationAxis() { return rotationAxis; }
 
 void computeMatricesFromInputs(GLFWwindow *window) {
 
@@ -41,18 +43,56 @@ void computeMatricesFromInputs(GLFWwindow *window) {
                     cos(horizontalAngle - M_PI / 2.0f));
   vec3 up = cross(right, direction);
 
-  // keydown shift + up
-  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
-      glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    position += vec3(0, 1, 0) * deltaTime * speed;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    // keydown up
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+      position += vec3(0, 1, 0) * deltaTime * speed;
+    //   keydown down
+    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+      position -= vec3(0, 1, 0) * deltaTime * speed;
+    // keydown t
+    else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) { // cooldown 1s
+        texture = !texture;
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown x
+    else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(1, 0, 0);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown y
+    else if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 1, 0);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown z
+    else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 0, 1);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown z
+    else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 0, 1);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown f
+    else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        // rainbow
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
   }
-
-  // keydown shift + down
-  else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
-           glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    position -= vec3(0, 1, 0) * deltaTime * speed;
-  }
-
   // keydown up
   else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
     position += direction * deltaTime * speed;
@@ -71,14 +111,6 @@ void computeMatricesFromInputs(GLFWwindow *window) {
   // keydown left
   else if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS) {
     position -= right * deltaTime * speed;
-  }
-
-  // keydown t
-  else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
-    if (currentTime - lastTimeKeyTPressed >= 1.0) { // cooldown 1s
-      texture = !texture;
-      lastTimeKeyTPressed = currentTime;
-    }
   }
 
   float FoV = initialFoV;
