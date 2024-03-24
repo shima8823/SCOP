@@ -1,17 +1,15 @@
-#include <iostream>
-#include <vector>
 #include <cmath>
+#include <iostream>
 #include <random>
+#include <vector>
 
 #include "opengl.hpp"
+#include "const.hpp"
+#include "controls.hpp"
 #include "ft_glm.hpp"
 #include "load.hpp"
-#include "controls.hpp"
-#include "const.hpp"
 
 GLFWwindow *window;
-
-const float ROTATE_SPEED = M_PI / 2.0f; // 90 degrees per second
 
 bool init() {
   if (!glfwInit())
