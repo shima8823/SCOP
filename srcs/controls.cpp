@@ -9,6 +9,8 @@ Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
 bool isRainbow = false;
+bool isFirst = true;
+bool isSecond = true;
 vec3 position = vec3(0, 4, 13);
 vec3 rotationAxis = vec3(0, 1, 0);
 float horizontalAngle = M_PI;
@@ -24,6 +26,12 @@ bool getIsRainbow() { return isRainbow; }
 vec3 getPosition() { return position; }
 vec3 getRotationAxis() { return rotationAxis; }
 
+void pointCameraToOrigin() {
+  vec3 directionToObject = normalize(ft_glm::vec3(0, 0, 0) - position);
+  horizontalAngle = atan2(directionToObject.x, directionToObject.z);
+  verticalAngle = asin(directionToObject.y);
+}
+
 void computeMatricesFromInputs(GLFWwindow *window) {
 
   static double lastTime = glfwGetTime();
@@ -38,6 +46,15 @@ void computeMatricesFromInputs(GLFWwindow *window) {
 
   horizontalAngle += mouseSpeed * float(SCREEN_WIDTH / 2 - xpos);
   verticalAngle += mouseSpeed * float(SCREEN_HEIGHT / 2 - ypos);
+
+  // xpos, ypos wrong value in 2frame
+  if (isFirst) {
+    pointCameraToOrigin();
+    isFirst = false;
+  } else if (isSecond) {
+    pointCameraToOrigin();
+    isSecond = false;
+  }
 
   vec3 direction(cos(verticalAngle) * sin(horizontalAngle), sin(verticalAngle),
                  cos(verticalAngle) * cos(horizontalAngle));
@@ -97,9 +114,7 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     // keydown p
     else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
       if (currentTime - lastTimeKeyTPressed >= 1.0) {
-        vec3 directionToObject = normalize(ft_glm::vec3(0, 0, 0) - position);
-        horizontalAngle = atan2(directionToObject.x, directionToObject.z);
-        verticalAngle = asin(directionToObject.y);
+        pointCameraToOrigin();
         lastTimeKeyTPressed = currentTime;
       }
     }
