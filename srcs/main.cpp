@@ -277,7 +277,11 @@ int main(const int argc, const char *argv[]) {
     glUniformMatrix4fv(ModelMatrixID, 1, GL_FALSE, &ModelMatrix[0][0]);
 
     ft_glm::vec3 cameraPos = getPosition();
-    glUniform3f(LightPosID, cameraPos.x, cameraPos.y, cameraPos.z);
+    if (getIsLightAbove()) {
+      glUniform3f(LightPosID, 0, 100, 100);
+    } else {
+      glUniform3f(LightPosID, cameraPos.x, cameraPos.y, cameraPos.z);
+    }
 
     glDrawArrays(GL_TRIANGLES, 0, vertices.size());
 

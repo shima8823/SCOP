@@ -9,6 +9,7 @@ Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
 bool isRainbow = false;
+bool isLightAbove = true;
 bool isFirst = true;
 bool isSecond = true;
 vec3 position = vec3(0, 4, 13);
@@ -23,6 +24,7 @@ Mat4 getViewMatrix() { return ViewMatrix; }
 Mat4 getProjectionMatrix() { return ProjectionMatrix; }
 bool getTexture() { return texture; }
 bool getIsRainbow() { return isRainbow; }
+bool getIsLightAbove() { return isLightAbove; }
 vec3 getPosition() { return position; }
 vec3 getRotationAxis() { return rotationAxis; }
 
@@ -115,6 +117,13 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
       if (currentTime - lastTimeKeyTPressed >= 1.0) {
         pointCameraToOrigin();
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown l
+    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        isLightAbove = !isLightAbove;
         lastTimeKeyTPressed = currentTime;
       }
     }

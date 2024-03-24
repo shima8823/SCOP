@@ -7,6 +7,7 @@ ft_glm::Mat4 getViewMatrix();
 ft_glm::Mat4 getProjectionMatrix();
 bool getTexture();
 bool getIsRainbow();
+bool getIsLightAbove();
 ft_glm::vec3 getPosition();
 ft_glm::vec3 getRotationAxis();
 
