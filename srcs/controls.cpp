@@ -1,7 +1,7 @@
 #include <iostream>
 
-#include "controls.hpp"
 #include "const.hpp"
+#include "controls.hpp"
 
 using namespace ft_glm;
 
@@ -91,6 +91,15 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
       if (currentTime - lastTimeKeyTPressed >= 1.0) {
         isRainbow = !isRainbow;
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown p
+    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        vec3 directionToObject = normalize(ft_glm::vec3(0, 0, 0) - position);
+        horizontalAngle = atan2(directionToObject.x, directionToObject.z);
+        verticalAngle = asin(directionToObject.y);
         lastTimeKeyTPressed = currentTime;
       }
     }
