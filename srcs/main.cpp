@@ -174,6 +174,12 @@ void sendUniforms(GLuint programID, Material &material) {
 }
 
 int main(const int argc, const char *argv[]) {
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " <obj file> [texture file]"
+              << std::endl;
+    return -1;
+  }
+
   if (!init()) {
     return -1;
   }
