@@ -1,0 +1,16 @@
+# Blender MTL File: 'bullet low.blend'
+# Material Count: 1
+
+newmtl Low_poly_bullet
+Ns 0.000000
+Ka 1.000000 1.000000 1.000000
+Kd 0.800000 0.800000 0.800000
+Ks 0.500000 0.500000 0.500000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 2
+map_Bump /Users/otto/Documents/blender/project tectures/L115A3/L115a3 low files/Bullet Low Normals.png
+map_Kd /Users/otto/Documents/blender/project tectures/L115A3/L115a3 low files/Bullet Low Diffuse.png
+map_Ns /Users/otto/Documents/blender/project tectures/L115A3/L115a3 low files/Bullet Low Roughnes.png
+refl /Users/otto/Documents/blender/project tectures/L115A3/L115a3 low files/Bullet Low Metalnes.png

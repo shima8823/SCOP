@@ -1,85 +1,133 @@
-#include "controls.hpp"
+#include <iostream>
 
 #include "const.hpp"
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <iostream>
+#include "controls.hpp"
 
 using namespace ft_glm;
 
 Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
 bool texture = false;
-// Initial position : on +Z
+bool isRainbow = false;
+bool isLightAbove = true;
+bool isFirst = true;
+bool isSecond = true;
 vec3 position = vec3(0, 4, 13);
-// Initial horizontal angle : toward -Z
-float horizontalAngle = 3.14f;
-// Initial vertical angle : none
+vec3 rotationAxis = vec3(0, 1, 0);
+float horizontalAngle = M_PI;
 float verticalAngle = 0.0f;
-// Initial Field of View
 float initialFoV = 45.0f;
-
-float speed = 3.0f; // 3 units / second
+float speed = 3.0f;
 float mouseSpeed = 0.005f;
 
 Mat4 getViewMatrix() { return ViewMatrix; }
 Mat4 getProjectionMatrix() { return ProjectionMatrix; }
 bool getTexture() { return texture; }
+bool getIsRainbow() { return isRainbow; }
+bool getIsLightAbove() { return isLightAbove; }
 vec3 getPosition() { return position; }
+vec3 getRotationAxis() { return rotationAxis; }
+
+void pointCameraToOrigin() {
+  vec3 directionToObject = normalize(ft_glm::vec3(0, 0, 0) - position);
+  horizontalAngle = atan2(directionToObject.x, directionToObject.z);
+  verticalAngle = asin(directionToObject.y);
+}
 
 void computeMatricesFromInputs(GLFWwindow *window) {
 
-  // glfwGetTime is called only once, the first time this function is called
   static double lastTime = glfwGetTime();
-  static double lastTimeKeyTPressed =
-      0.0; // Initialize with 0 to allow immediate first use
+  static double lastTimeKeyTPressed = 0.0;
 
-  // Compute time difference between current and last frame
   double currentTime = glfwGetTime();
   float deltaTime = float(currentTime - lastTime);
 
-  // Get mouse position
   double xpos, ypos;
   glfwGetCursorPos(window, &xpos, &ypos);
-  if (xpos < 0 || SCREEN_WIDTH < xpos || ypos < 0 || SCREEN_HEIGHT < ypos ||
-      xpos < ypos) {
-    xpos = SCREEN_WIDTH / 2;
-    ypos = SCREEN_HEIGHT / 2;
-  }
-
-  //   std::cout << "xpos: " << xpos << " ypos: " << ypos << std::endl;
-
-  // Reset mouse position for next frame
   glfwSetCursorPos(window, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2);
 
-  // Compute new orientation
   horizontalAngle += mouseSpeed * float(SCREEN_WIDTH / 2 - xpos);
   verticalAngle += mouseSpeed * float(SCREEN_HEIGHT / 2 - ypos);
 
-  // Direction : Spherical coordinates to Cartesian coordinates conversion
+  // xpos, ypos wrong value in 2frame
+  if (isFirst) {
+    pointCameraToOrigin();
+    isFirst = false;
+  } else if (isSecond) {
+    pointCameraToOrigin();
+    isSecond = false;
+  }
+
   vec3 direction(cos(verticalAngle) * sin(horizontalAngle), sin(verticalAngle),
                  cos(verticalAngle) * cos(horizontalAngle));
-
-  // Right vector
-  vec3 right = vec3(sin(horizontalAngle - 3.14f / 2.0f), 0,
-                    cos(horizontalAngle - 3.14f / 2.0f));
-
-  // Up vector
+  vec3 right = vec3(sin(horizontalAngle - M_PI / 2.0f), 0,
+                    cos(horizontalAngle - M_PI / 2.0f));
   vec3 up = cross(right, direction);
 
-  // keydown shift + up
-  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
-      glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
-    // world position y is up
-    position += vec3(0, 1, 0) * deltaTime * speed;
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    // keydown up
+    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+      position += vec3(0, 1, 0) * deltaTime * speed;
+    //   keydown down
+    else if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+      position -= vec3(0, 1, 0) * deltaTime * speed;
+    // keydown t
+    else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) { // cooldown 1s
+        texture = !texture;
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown x
+    else if (glfwGetKey(window, GLFW_KEY_X) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(1, 0, 0);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown y
+    else if (glfwGetKey(window, GLFW_KEY_Y) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 1, 0);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown z
+    else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 0, 1);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown z
+    else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        rotationAxis = vec3(0, 0, 1);
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown f
+    else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        isRainbow = !isRainbow;
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown p
+    else if (glfwGetKey(window, GLFW_KEY_P) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        pointCameraToOrigin();
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
+    // keydown l
+    else if (glfwGetKey(window, GLFW_KEY_L) == GLFW_PRESS) {
+      if (currentTime - lastTimeKeyTPressed >= 1.0) {
+        isLightAbove = !isLightAbove;
+        lastTimeKeyTPressed = currentTime;
+      }
+    }
   }
-
-  // keydown shift + down
-  else if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS &&
-      glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS) {
-    position -= vec3(0, 1, 0) * deltaTime * speed;
-  }
-  
   // keydown up
   else if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS) {
     position += direction * deltaTime * speed;
@@ -100,32 +148,8 @@ void computeMatricesFromInputs(GLFWwindow *window) {
     position -= right * deltaTime * speed;
   }
 
-  // keydown t
-  //  押されたら1秒間クールダウンを設定
-  else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
-    if (currentTime - lastTimeKeyTPressed >= 1.0) {
-      texture = !texture;
-      lastTimeKeyTPressed =
-          currentTime; // Update the last pressed time for cooldown
-    }
-  }
-
-  float FoV =
-      initialFoV; // - 5 * glfwGetMouseWheel(); // Now GLFW 3 requires setting
-                  // up a callback for this. It's a bit too complicated for this
-                  // beginner's tutorial, so it's disabled instead.
-
-  // Projection matrix : 45 Field of View, 4:3 ratio, display range : 0.1 unit
-  // <-> 100 units
+  float FoV = initialFoV;
   ProjectionMatrix = perspective(radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);
-  // Camera matrix
-  ViewMatrix = lookAt(
-      position, // Camera is here
-      position +
-          direction, // and looks here : at the same position, plus "direction"
-      up             // Head is up (set to 0,-1,0 to look upside-down)
-  );
-
-  // For the next frame, the "last time" will be "now"
+  ViewMatrix = lookAt(position, position + direction, up);
   lastTime = currentTime;
 }

@@ -6,11 +6,11 @@ CPPFLAGS =
 LDFLAGS = 
 LDLIBS = -lglfw -lGLEW -framework OpenGL
 NAME = scop
-INCDIR	=	includes
+INCDIR	=	$(shell brew --prefix glew)/include $(shell brew --prefix glfw)/include $(shell brew --prefix glm)/include includes
 INCS	=	$(addprefix -I,$(INCDIR))
 
 # ########### SRCS ########### #
-SRCS = main.cpp load.cpp ft_glm.cpp controls.cpp
+SRCS = main.cpp ft_glm.cpp controls.cpp load_obj.cpp load_bmp.cpp load_shader.cpp load_material.cpp
 VPATH = srcs
 # ############################ #
 

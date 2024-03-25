@@ -1,0 +1,14 @@
+# Blender 3.6.7 MTL File: 'bullet.blend'
+# www.blender.org
+
+newmtl bullet
+Ka 1.000000 1.000000 1.000000
+Ks 0.500000 0.500000 0.500000
+Ke 0.000000 0.000000 0.000000
+Ni 1.450000
+d 1.000000
+illum 2
+map_Kd tex/bullet_DefaultMaterial_BaseColor.png
+map_Ns tex/bullet_DefaultMaterial_Roughness.png
+map_refl tex/bullet_DefaultMaterial_Metallic.png
+map_Bump -bm 1.000000 tex/bullet_DefaultMaterial_Normal.png

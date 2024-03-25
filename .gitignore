@@ -10,7 +10,6 @@ local_notes
 *.slo
 *.lo
 *.o
-*.obj
 
 # Precompiled Headers
 *.gch

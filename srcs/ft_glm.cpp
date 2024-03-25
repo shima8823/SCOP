@@ -1,5 +1,6 @@
-#include "ft_glm.hpp"
 #include <iostream>
+
+#include "ft_glm.hpp"
 
 namespace ft_glm {
 
@@ -11,42 +12,11 @@ Mat4::Mat4(float defaulValue) {
   }
 }
 
-Mat4 Mat4::operator+(const Mat4 &other) const {
-  Mat4 result(0.0f);
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      result[i][j] = mat[i][j] + other.mat[i][j];
-    }
-  }
-  return result;
-}
-
-Mat4 Mat4::operator-(const Mat4 &other) const {
-  Mat4 result(0.0f);
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      result[i][j] = mat[i][j] - other.mat[i][j];
-    }
-  }
-  return result;
-}
-
-Mat4 Mat4::operator*(float scalar) const {
-  Mat4 result(0.0f);
-  for (int i = 0; i < 4; ++i) {
-    for (int j = 0; j < 4; ++j) {
-      result[i][j] = mat[i][j] * scalar;
-    }
-  }
-  return result;
-}
-
 Mat4 Mat4::operator*(const Mat4 &other) const {
   Mat4 result(0.0f);
-  for (int i = 0; i < 4; ++i) {   // 結果行列の各列に対して
-    for (int j = 0; j < 4; ++j) { // 結果行列の各行に対して
+  for (int i = 0; i < 4; ++i) {
+    for (int j = 0; j < 4; ++j) {
       for (int k = 0; k < 4; ++k) {
-        // 左側の行列のk列目と右側の行列のk行目のドット積
         result.mat[j][i] += this->mat[k][i] * other.mat[j][k];
       }
     }
@@ -78,10 +48,9 @@ Mat4 perspective(float fov, float aspect, float zNear, float zFar) {
 }
 
 Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
-  // f,s,u is vector. why they having vec3 because ワールド座標にするため
   vec3 f = center - eye; // forward vector
   vec3 s = cross(f, up); // side vector
-  vec3 u = cross(s, f); // corrected up vector
+  vec3 u = cross(s, f);  // up vector
 
   f.normalize();
   s.normalize();
@@ -91,16 +60,16 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   result[0][0] = s.x;
   result[1][0] = s.y;
   result[2][0] = s.z;
+
   result[0][1] = u.x;
   result[1][1] = u.y;
   result[2][1] = u.z;
 
-  //   なぜマイナスかは、z軸が逆だから
   result[0][2] = -f.x;
   result[1][2] = -f.y;
   result[2][2] = -f.z;
 
-  // これは何表してんの？
+  // 内積で移動量を計算
   result[3][0] = -s * eye;
   result[3][1] = -u * eye;
   result[3][2] = f * eye;
@@ -108,7 +77,14 @@ Mat4 lookAt(const vec3 &eye, const vec3 &center, const vec3 &up) {
   return result;
 }
 
+Mat4 translate(Mat4 const &m, vec3 const &v) {
+  Mat4 Result = m;
+  Result[3] = m[0] * v.x + m[1] * v.y + m[2] * v.z + m[3];
+  return Result;
+}
+
 Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
+  // ロドリゲスの回転公式
   float const a = angle;
   float const c = cos(a);
   float const s = sin(a);
@@ -117,35 +93,22 @@ Mat4 rotate(Mat4 const &m, float angle, vec3 const &v) {
   vec3 temp(axis * (1 - c));
 
   Mat4 Rotate;
-  Rotate[0][0] = c + temp.x * axis.y;
-  Rotate[0][1] = temp.x * axis.y + s * axis.z;
-  Rotate[0][2] = temp.x * axis.z - s * axis.y;
+  Rotate[0][0] = axis.x * temp.x + c;
+  Rotate[0][1] = axis.x * temp.y + axis.z * s;
+  Rotate[0][2] = axis.x * temp.z - axis.y * s;
 
-  Rotate[1][0] = temp.y * axis.x - s * axis.z;
-  Rotate[1][1] = c + temp.y * axis.y;
-  Rotate[1][2] = temp.y * axis.z + s * axis.x;
+  Rotate[1][0] = axis.x * temp.y - axis.z * s;
+  Rotate[1][1] = axis.y * temp.y + c;
+  Rotate[1][2] = axis.y * temp.z + axis.x * s;
 
-  Rotate[2][0] = temp.x * axis.x + s * axis.y;
-  Rotate[2][1] = temp.x * axis.y - s * axis.x;
-  Rotate[2][2] = c + temp.x * axis.z;
+  Rotate[2][0] = axis.x * temp.z + axis.y * s;
+  Rotate[2][1] = axis.y * temp.z - axis.x * s;
+  Rotate[2][2] = axis.z * temp.z + c;
 
   Mat4 Result;
-
-  // Result[0] = m[0] * Rotate[0][0] + m[1] * Rotate[0][1] + m[2] *
-  // Rotate[0][2];
-  Result[0] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[0][0]),
-                              vec4MulScalar(m[1], Rotate[0][1])),
-                      vec4MulScalar(m[2], Rotate[0][2]));
-  // Result[1] = m[0] * Rotate[1][0] + m[1] * Rotate[1][1] + m[2] *
-  // Rotate[1][2];
-  Result[1] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[1][0]),
-                              vec4MulScalar(m[1], Rotate[1][1])),
-                      vec4MulScalar(m[2], Rotate[1][2]));
-  // Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] *
-  // Rotate[2][2];
-  Result[2] = vec4Add(vec4Add(vec4MulScalar(m[0], Rotate[2][0]),
-                              vec4MulScalar(m[1], Rotate[2][1])),
-                      vec4MulScalar(m[2], Rotate[2][2]));
+  Result[0] = m[0] * Rotate[0][0] + m[1] * Rotate[0][1] + m[2] * Rotate[0][2];
+  Result[1] = m[0] * Rotate[1][0] + m[1] * Rotate[1][1] + m[2] * Rotate[1][2];
+  Result[2] = m[0] * Rotate[2][0] + m[1] * Rotate[2][1] + m[2] * Rotate[2][2];
   Result[3] = m[3];
   return Result;
 }
