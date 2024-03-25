@@ -1,6 +1,6 @@
 # Blender v3.0.0 OBJ File: 'bullet.blend'
 # www.blender.org
-mtllib bullet.mtl
+mtllib bullet_low.mtl
 o bullet_Cylinder.001
 v 0.016101 0.000028 -0.002942
 v 0.032307 0.000056 -0.000428
