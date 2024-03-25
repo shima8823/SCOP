@@ -1,7 +1,6 @@
 CXX = c++
 # -Wall -Wextra -Werror -pedantic-errors
 CXXFLAGS = -std=c++17 -MMD -MP -g
-# -Iinclude/containers -Iinclude/utils
 CPPFLAGS = 
 LDFLAGS = 
 LDLIBS = -lglfw -lGLEW -framework OpenGL
@@ -38,9 +37,6 @@ clean:
 fclean: clean
 	$(RM) $(NAME)
 
-leaks: $(NAME)
-	leaks -q -atExit -- ./$(NAME)
-
 format:
 	clang-format -style=file -i $(VPATH)/* $(INCDIR)/*
 
@@ -49,4 +45,4 @@ format:
 re: fclean all
 
 -include $(DEPENDS)
-.PHONY: all clean fclean re leaks
+.PHONY: all clean fclean re
