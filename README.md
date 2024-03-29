@@ -1,6 +1,8 @@
 # SCOP
-SCOP is 42 project.　Basic GPU rendering with OpenGL. 
+SCOP is 42 project.Basic GPU rendering with OpenGL.
+
 The program should load a 3D object from an .obj file and display it in a window using perspective projection.
+
 The object should rotate around its central axis.
 
 # How to Run
