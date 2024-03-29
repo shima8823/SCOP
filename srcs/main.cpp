@@ -250,7 +250,7 @@ int main(const int argc, const char *argv[]) {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindVertexArray(vao);
 
-    computeMatricesFromInputs(window);
+    computeMatricesFromInputs(window, programID);
     ft_glm::Mat4 ProjectionMatrix = getProjectionMatrix();
     ft_glm::Mat4 ViewMatrix = getViewMatrix();
     if (getTexture()) {

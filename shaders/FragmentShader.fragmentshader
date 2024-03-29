@@ -10,12 +10,14 @@ out vec3 color;
 uniform sampler2D myTextureSampler;
 uniform int useTexture;
 uniform int isRainbow;
+uniform int prevColor; // 0: normal 1: fragmentColor, 2: textureColor
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 ambientMaterial;
 uniform vec3 diffuseMaterial;
 uniform vec3 specularMaterial;
 uniform float shininess;
+uniform float mixFactor;
 
 void main()
 {
@@ -35,13 +37,46 @@ void main()
     vec3 specular = specularMaterial * spec * lightColor;
 
     vec3 result = ambient + diffuse + specular;
-    if (useTexture > 0) {
-        result *= texture(myTextureSampler, UV).rgb;
-    } else {
-        if (isRainbow > 0) {
-            result *= fragmentColor;
-        } else {
-            result *= vec3(1.0, 1.0, 1.0);
+    vec3 textureColor = texture(myTextureSampler, UV).rgb;
+    if (useTexture > 0 && isRainbow <= 0) {
+        switch (prevColor) {
+        case 1: // raibow to texture
+            result *= mix(fragmentColor, textureColor, mixFactor);
+            break;
+        case 0: // normal to texture
+            result *= mix(vec3(1.0, 1.0, 1.0), textureColor, mixFactor);
+            break;
+        }
+    } else if (useTexture <= 0 && isRainbow > 0) {
+        switch (prevColor) {
+        case 2: // texture to fragmentColor
+            result *= mix(textureColor, fragmentColor, mixFactor);
+            break;
+        case 0: // normal to fragmentColor
+            result *= mix(vec3(1.0, 1.0, 1.0), fragmentColor, mixFactor);
+            break;
+        }
+    } else if (useTexture > 0 && isRainbow > 0) {
+        switch (prevColor) {
+        case 0: // normal to raibow
+            result *= mix(vec3(1.0, 1.0, 1.0), fragmentColor, mixFactor);
+            break;
+        case 1: // raibow to texture
+            result *= mix(fragmentColor, textureColor, mixFactor);
+            break;
+        case 2: // texture to raibow
+            result *= mix(textureColor, fragmentColor, mixFactor);
+            break;
+    }
+    } else if (useTexture <= 0 && isRainbow <= 0) {
+        vec3 baseColor = vec3(1.0, 1.0, 1.0);
+        switch (prevColor) {
+        case 1: // raibow to baseColor
+            result *= mix(fragmentColor, baseColor, mixFactor);
+            break;
+        case 2: // texture to baseColor
+            result *= mix(textureColor, baseColor, mixFactor);
+            break;
         }
     }
     color = result;
