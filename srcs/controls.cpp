@@ -115,13 +115,6 @@ void computeMatricesFromInputs(GLFWwindow *window, GLuint programId) {
         lastTimeKeyTPressed = currentTime;
       }
     }
-    // keydown z
-    else if (glfwGetKey(window, GLFW_KEY_Z) == GLFW_PRESS) {
-      if (isCooldownFinished(currentTime, lastTimeKeyTPressed)) {
-        rotationAxis = vec3(0, 0, 1);
-        lastTimeKeyTPressed = currentTime;
-      }
-    }
     // keydown f
     else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
       if (isCooldownFinished(currentTime, lastTimeKeyTPressed) &&
