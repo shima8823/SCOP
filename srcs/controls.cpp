@@ -5,10 +5,12 @@
 
 using namespace ft_glm;
 
+const int COLOR_NORMAL = 0;
+const int COLOR_RAINBOW = 1;
+const int COLOR_TEXTURE = 2;
+
 Mat4 ViewMatrix;
 Mat4 ProjectionMatrix;
-bool texture = false;
-bool isRainbow = false;
 bool isLightAbove = true;
 bool isFirst = true;
 bool isSecond = true;
@@ -22,13 +24,12 @@ float speed = 3.0f;
 float mouseSpeed = 0.005f;
 float mixFactor = 0.0f;
 float animationDuration = 1.0f;
-int prevColor = 0; // 0: white, 1: rainbow, 2: texture
+int currentColor = 0; // 0: normal, 1: rainbow, 2: texture
+int prevColor = 0;    // 0: normal, 1: rainbow, 2: texture
 double animationStartTime = 0.0;
 
 Mat4 getViewMatrix() { return ViewMatrix; }
 Mat4 getProjectionMatrix() { return ProjectionMatrix; }
-bool getTexture() { return texture; }
-bool getIsRainbow() { return isRainbow; }
 bool getIsLightAbove() { return isLightAbove; }
 vec3 getPosition() { return position; }
 vec3 getRotationAxis() { return rotationAxis; }
@@ -85,13 +86,9 @@ void computeMatricesFromInputs(GLFWwindow *window, GLuint programId) {
     else if (glfwGetKey(window, GLFW_KEY_T) == GLFW_PRESS) {
       if (isCooldownFinished(currentTime, lastTimeKeyTPressed) &&
           !startAnimation) { // cooldown 1s
-        if (isRainbow) {
-          prevColor = 1;
-          isRainbow = false;
-        } else if (texture) {
-          prevColor = 2;
-        }
-        texture = !texture;
+        prevColor = currentColor;
+        currentColor =
+            (currentColor == COLOR_TEXTURE ? COLOR_NORMAL : COLOR_TEXTURE);
         startAnimation = true;
         animationStartTime = glfwGetTime();
         lastTimeKeyTPressed = currentTime;
@@ -129,13 +126,9 @@ void computeMatricesFromInputs(GLFWwindow *window, GLuint programId) {
     else if (glfwGetKey(window, GLFW_KEY_F) == GLFW_PRESS) {
       if (isCooldownFinished(currentTime, lastTimeKeyTPressed) &&
           !startAnimation) {
-        if (texture) {
-          prevColor = 2;
-          texture = false;
-        } else if (isRainbow) {
-          prevColor = 1;
-        }
-        isRainbow = !isRainbow;
+        prevColor = currentColor;
+        currentColor =
+            (currentColor == COLOR_RAINBOW ? COLOR_NORMAL : COLOR_RAINBOW);
         startAnimation = true;
         animationStartTime = glfwGetTime();
         lastTimeKeyTPressed = currentTime;
@@ -182,7 +175,7 @@ void computeMatricesFromInputs(GLFWwindow *window, GLuint programId) {
 
     if (mixFactor > 1.0f) {
       mixFactor = 1.0f;
-      if (!isRainbow || !texture)
+      if (currentColor != COLOR_TEXTURE || currentColor != COLOR_RAINBOW)
         prevColor = 0;
       startAnimation = false;
     }
@@ -190,6 +183,7 @@ void computeMatricesFromInputs(GLFWwindow *window, GLuint programId) {
 
   glUniform1f(glGetUniformLocation(programId, "mixFactor"), mixFactor);
   glUniform1i(glGetUniformLocation(programId, "prevColor"), prevColor);
+  glUniform1i(glGetUniformLocation(programId, "currentColor"), currentColor);
 
   float FoV = initialFoV;
   ProjectionMatrix = perspective(radians(FoV), 4.0f / 3.0f, 0.1f, 100.0f);

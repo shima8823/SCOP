@@ -8,9 +8,8 @@ in vec3 FragPos;
 out vec3 color;
 
 uniform sampler2D myTextureSampler;
-uniform int useTexture;
-uniform int isRainbow;
 uniform int prevColor; // 0: normal 1: fragmentColor, 2: textureColor
+uniform int currentColor; // 0: normal 1: fragmentColor, 2: textureColor
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 uniform vec3 ambientMaterial;
@@ -38,46 +37,10 @@ void main()
 
     vec3 result = ambient + diffuse + specular;
     vec3 textureColor = texture(myTextureSampler, UV).rgb;
-    if (useTexture > 0 && isRainbow <= 0) {
-        switch (prevColor) {
-        case 1: // raibow to texture
-            result *= mix(fragmentColor, textureColor, mixFactor);
-            break;
-        case 0: // normal to texture
-            result *= mix(vec3(1.0, 1.0, 1.0), textureColor, mixFactor);
-            break;
-        }
-    } else if (useTexture <= 0 && isRainbow > 0) {
-        switch (prevColor) {
-        case 2: // texture to fragmentColor
-            result *= mix(textureColor, fragmentColor, mixFactor);
-            break;
-        case 0: // normal to fragmentColor
-            result *= mix(vec3(1.0, 1.0, 1.0), fragmentColor, mixFactor);
-            break;
-        }
-    } else if (useTexture > 0 && isRainbow > 0) {
-        switch (prevColor) {
-        case 0: // normal to raibow
-            result *= mix(vec3(1.0, 1.0, 1.0), fragmentColor, mixFactor);
-            break;
-        case 1: // raibow to texture
-            result *= mix(fragmentColor, textureColor, mixFactor);
-            break;
-        case 2: // texture to raibow
-            result *= mix(textureColor, fragmentColor, mixFactor);
-            break;
-    }
-    } else if (useTexture <= 0 && isRainbow <= 0) {
-        vec3 baseColor = vec3(1.0, 1.0, 1.0);
-        switch (prevColor) {
-        case 1: // raibow to baseColor
-            result *= mix(fragmentColor, baseColor, mixFactor);
-            break;
-        case 2: // texture to baseColor
-            result *= mix(textureColor, baseColor, mixFactor);
-            break;
-        }
-    }
+    vec3 array[3];
+    array[0] = vec3(1.0, 1.0, 1.0);
+    array[1] = fragmentColor;
+    array[2] = textureColor;
+    result *= mix(array[prevColor], array[currentColor], mixFactor);
     color = result;
 }

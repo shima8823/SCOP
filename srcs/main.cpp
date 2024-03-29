@@ -253,17 +253,6 @@ int main(const int argc, const char *argv[]) {
     computeMatricesFromInputs(window, programID);
     ft_glm::Mat4 ProjectionMatrix = getProjectionMatrix();
     ft_glm::Mat4 ViewMatrix = getViewMatrix();
-    if (getTexture()) {
-      glUniform1i(useTextureLocation, 1);
-    } else {
-      glUniform1i(useTextureLocation, 0);
-    }
-
-    if ((getIsRainbow())) {
-      glUniform1i(isRainbowLocation, 1);
-    } else {
-      glUniform1i(isRainbowLocation, 0);
-    }
 
     ft_glm::vec3 rotationAxis = getRotationAxis();
     angle += ROTATE_SPEED * deltaTime;
