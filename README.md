@@ -34,7 +34,7 @@ Shift + F                       : Fever mode!!
 ![scop_42](https://github.com/shima8823/SCOP/assets/57759015/c2c9d82f-1a3e-4c60-9e5b-c1116f37d9e5) ![scop_barrel](https://github.com/shima8823/SCOP/assets/57759015/b31ddf91-3476-4570-be9e-f85a5b1a3dd6)
 ![scop_teapot](https://github.com/shima8823/SCOP/assets/57759015/69b69f24-65e8-42cd-a11b-c559e55ce422)
 
-
-
 https://github.com/shima8823/SCOP/assets/57759015/1f96a97c-2f72-4836-82c8-0984db852313
 
+# My Document
+https://windy-lyric-9b4.notion.site/SCOP-455b107537da4f08b4b173b415047116
